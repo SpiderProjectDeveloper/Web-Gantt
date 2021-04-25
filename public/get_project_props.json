@@ -1,0 +1,18 @@
+﻿{
+  "parameters" : {
+    "language" : "ru",
+    "timeDelim" : ":",
+    "dateDelim" : ".",
+    "dateFormat" : "",
+    "uploadTime" : 1619105260 
+  },
+  "project" : {
+    "Code" : "01km_exp",
+    "Version" : "1",
+    "Name" : "1 км дороги",
+    "CurTime" : 1521187200,
+    "dataChanged" : 161909567
+  },
+  "errcode" : 0,
+  "error" : "" 
+}

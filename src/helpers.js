@@ -211,47 +211,54 @@ export function getGanttMaxLeft() {
 
 
 export function initDataHelpers() {
-    _data.table = [];
-    // Adding a column for expanding rows if required
-    if( _data.table.length === 0 ) {
-        _data.table.push({ 
-            ref:"expandColumn", name:"[]", type:null, widthsym:2, hidden:0, format:null, editable:false 
-        });
-    }
-    for( let col = 0 ; col < _data.fields.length ; col++ ) {
-        if( 'hidden' in _data.fields[col] && _data.fields[col].hidden === 1 ) {
-            continue;
-        }
-        let editable = ('editable' in _data.fields[col] && _data.fields[col].editable===1);
-        let widthsym = ('widthsym' in _data.fields[col]) ? _data.fields[col].widthsym : null;
-        _data.table.push( {
-            ref: _data.fields[col].Code, name:_data.fields[col].Name, 
-            type:_data.fields[col].Type, format: _data.fields[col].format,
-            editable: editable, widthsym: widthsym
-        });
-    }
-    // Creating editables for better data handling 
-    _data.editables = [];     
-    for( let col = 0 ; col < _data.table.length ; col++ ) {
-        if( 'editable' in _data.table[col] && _data.table[col].editable ) {
-            _data.editables.push({ 
-                ref: _data.table[col].ref, name:_data.table[col].name, 
-                type:_data.table[col].type, format: _data.table[col].format 
-            });
-        }
-    }
-       
-    // Creating refSettings for better data handling
-    _data.refSettings = {}; 
-    for( let col = 0 ; col < _data.table.length ; col++ ) {
-        let o = { column: col, type: _data.table[col].type, format: _data.table[col].format, name: _data.table[col].name, editableType: null };
-        for( let ie = 0 ; ie < _data.editables.length ; ie++ ) { 	// Is editable?
-            if( _data.editables[ie].ref === _data.table[col].ref ) {
-                o.editableType = _data.editables[ie].type;
-            }
-        }
-        _data.refSettings[ _data.table[col].ref ] = o;
-    }
+	_data.table = [];
+	// Adding a column for expanding rows if required
+	if( _data.table.length === 0 ) {
+			_data.table.push({ 
+					ref:"expandColumn", name:"[]", type:null, widthsym:2, hidden:0, format:null, editable:false 
+			});
+	}
+	for( let col = 0 ; col < _data.fields.length ; col++ ) {
+			if( 'hidden' in _data.fields[col] && _data.fields[col].hidden === 1 ) {
+					continue;
+			}
+			let editable = ('editable' in _data.fields[col] && _data.fields[col].editable===1);
+			let widthsym = ('widthsym' in _data.fields[col]) ? _data.fields[col].widthsym : null;
+			_data.table.push({
+					ref: _data.fields[col].Code, name:_data.fields[col].Name, 
+					type:_data.fields[col].Type, format: _data.fields[col].format,
+					editable: editable, widthsym: widthsym
+			});
+	}
+	// Creating editables for better data handling 
+	_data.editables = [];     
+	for( let col = 0 ; col < _data.table.length ; col++ ) {
+			if( 'editable' in _data.table[col] && _data.table[col].editable ) {
+					_data.editables.push({ 
+							ref: _data.table[col].ref, name:_data.table[col].name, 
+							type:_data.table[col].type, format: _data.table[col].format 
+					});
+			}
+	}
+			
+	// Creating refSettings for better data handling
+	_data.refSettings = {}; 
+	for( let col = 0 ; col < _data.table.length ; col++ ) {
+			let o = { column: col, type: _data.table[col].type, format: _data.table[col].format, name: _data.table[col].name, editableType: null };
+			for( let ie = 0 ; ie < _data.editables.length ; ie++ ) { 	// Is editable?
+					if( _data.editables[ie].ref === _data.table[col].ref ) {
+							o.editableType = _data.editables[ie].type;
+					}
+			}
+			_data.refSettings[ _data.table[col].ref ] = o;
+	}
+
+	// Handling table columns widths
+	for( let col = 0 ; col < _data.table.length ; col++ ) { // Recalculating widths in symbols into widths in points 
+    let add = _settings.tableColumnHMargin*2 + _settings.tableColumnTextMargin*2;
+    let isWid = ('widthsym' in _data.table[col] && _data.table[col].widthsym !== null );
+		_data.table[col].width = (isWid) ? (_data.table[col].widthsym * _settings.tableMaxFontSize*0.5 + add) : 5;
+	}
 }
 
 
@@ -359,7 +366,7 @@ export function initLayoutCoords() {
 export function calcNotHiddenOperationsLength() {
 	let numVisible = 0;
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
-		if( _data.activities[i].visible ) {
+		if( _data.meta[i].visible ) {
 			numVisible += 1;
 		}
 	}
@@ -779,16 +786,16 @@ export function expandToLevel( level=null, redraw=false ) {
 		level = _maxExpandableLevel;
 	} 
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
-		// console.log(`level=${_data.activities[i].Level}, parents=${_data.activities[i].parents.length}`);
-		if( _data.activities[i].parents.length < level-1 ) {
-			_data.activities[i].expanded = true;
-			_data.activities[i].visible = true;
-		} else if( _data.activities[i].parents.length == level-1 ) {
-			_data.activities[i].expanded = false;
-			_data.activities[i].visible = true;
+		// console.log(`level=${_data.activities[i].Level}, parents=${_data.meta[i].parents.length}`);
+		if( _data.meta[i].parents.length < level-1 ) {
+			_data.meta[i].expanded = true;
+			_data.meta[i].visible = true;
+		} else if( _data.meta[i].parents.length == level-1 ) {
+			_data.meta[i].expanded = false;
+			_data.meta[i].visible = true;
 		} else {
-			_data.activities[i].expanded = false;
-			_data.activities[i].visible = false;
+			_data.meta[i].expanded = false;
+			_data.meta[i].visible = false;
 		}
 	}
 	if( redraw ) {
@@ -823,7 +830,7 @@ export function getFormatForTableCellAndValue( i, ref ) {
     }
 
 	if( ref == 'Name') {
-		let hrh = _data.activities[i].parents.length;
+		let hrh = _data.meta[i].parents.length;
         r.value = spacesToPadNameAccordingToHierarchy(hrh) + r.value;
         if( typeof(_data.activities[i].Level) === 'number' ) { // If it is a phase...
             r.fontWeight = 'bold'; // ... making it bold.
@@ -844,9 +851,28 @@ export function getFormatForTableCellAndValue( i, ref ) {
     return r;
 }
 
-export function moveColumnOfTable( from, to, initDataRefSett=true ) {
-    moveElementInsideArrayOfObjects( _data.table, from, to );
-    if( initDataRefSett )
-        initDataHelpers();
+export function moveColumnOfTable( from, to ) {
+  moveElementInsideArrayOfObjects( _data.table, from, to );
 }
 
+
+function calcPhaseCoords( rectStart, rectTop, rectWidth, rectHeight, brackets=0 ) {
+	let phaseBracketHeight = rectHeight * _settings.ganttRectBracketRelHeight;
+	let thick = (rectWidth+rectWidth > _settings.ganttRectBracketThick) ? _settings.ganttRectBracketThick : 1;
+	let rectEnd = rectStart + rectWidth;
+	let rectBottom = rectTop + rectHeight;
+	let phaseCoords;
+	if( brackets == 0 ) { // Both brackets
+		phaseCoords = rectStart+" "+rectTop+" "+rectEnd+" "+rectTop+" "+rectEnd+" "+rectBottom;
+		phaseCoords += " "+(rectEnd - thick)+" "+(rectBottom-phaseBracketHeight);
+		phaseCoords += " "+(rectStart + thick)+" "+(rectBottom-phaseBracketHeight)+" "+rectStart+" "+rectBottom;		
+	} else if( brackets == 1 ) {  // Only right bracket
+		phaseCoords = rectStart+" "+rectTop+" "+rectEnd+" "+rectTop+" "+rectEnd+" "+rectBottom;
+		phaseCoords += " "+(rectEnd - thick)+" "+(rectBottom-phaseBracketHeight);
+		phaseCoords += " "+rectStart+" "+(rectBottom-phaseBracketHeight);				
+	} else { // Only left bracket
+		phaseCoords = rectStart+" "+rectTop+" "+rectEnd+" "+rectTop+" "+rectEnd+" "+(rectBottom- phaseBracketHeight);
+		phaseCoords += " "+(rectStart + thick)+" "+(rectBottom-phaseBracketHeight)+" "+rectStart+" "+rectBottom;		
+	}
+	return phaseCoords;
+}

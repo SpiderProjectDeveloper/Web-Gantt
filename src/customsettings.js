@@ -1,6 +1,6 @@
 import { _data, _globals } from './globals.js'
 import { getCookie, deleteCookie } from './utils.js'
-import { validateTopAndHeight, validateGanttLeft, moveColumnOfTable, initDataHelpers } from './helpers.js'
+import { validateTopAndHeight, validateGanttLeft, moveColumnOfTable } from './helpers.js'
 
 export function readCustomSettings() {
     // Reading cookies to init interface elements.
@@ -30,13 +30,13 @@ export function readCustomSettings() {
 			for( let cookie = 0 ; cookie < _data.table.length ; cookie++ ) { // Searching for the column to be moved to 'moveTo' position...
 				let pos = getCookie( _data.table[cookie].ref+"Position", 'int' );
 				if( pos == moveTo ) {
-                    moveColumnOfTable( cookie, moveTo, false );                    
+          moveColumnOfTable( cookie, moveTo );                    
 					moveTo -= 1;
 					break;
 				}
 			}
-        }
-        initDataHelpers();
+    }
+    //initDataHelpers();	
 	} else { // Deleting all the cookies that stores positions of columns...
 		for( let cookie = 0 ; cookie < _data.table.length ; cookie++ ) {
 			let cname = _data.table[cookie].ref+"Position";
@@ -44,7 +44,7 @@ export function readCustomSettings() {
 				deleteCookie( cname );
 			}
 		}
-    }
+  }
 
 	// Reading and validating top and height saved in cookies
 	let gvt = getCookie('ganttVisibleTop', 'float');

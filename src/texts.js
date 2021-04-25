@@ -156,7 +156,7 @@ export var _texts = {
 		enterUserDataMessage: 'ENTER USER DATA HERE',
 		errorUserData:'The data you\'ve entered are corrupted. Please contact your system administrator!',
 		synchronizedMessage: 'All the data currently presented are synchronized with your Spider Project application',
-		unsynchronizedMessage: 'The data you entered has not been uploaded into Spider Project yet!',
+		unsynchronizedMessage: 'The data you see has changed. Please refresh the page!',
 		intError:'Error: only integer numbers are allowed!',
 		floatError:'Error: only floating point values are allowed (numbers and a decimal dot)!',
 		datetimeError:'Error: invalid datetime format!',
@@ -173,8 +173,8 @@ export var _texts = {
 		titlesRightTitle:'Click to display titles above operations and phases',
 		titlesAboveTitle:'Click to display titles of operations and phases rightward',
 		titlesHiddenTitle:'The titles of operations and phases are hidden due to way too small size. Please zoom in to display the titles!',
-		titleNewProject:'Reset the settings and redisplay the page. Use it when a new project has been uploaded',
-		menuGanttTitle:'Gantt', menuHelpTitle:'Help', menuPrintTitle:'Print', menuLogout:'Logout' },
+		titleNewProject:'Redisplay the page resetting it to the default settings. Also used when a new project has been uploaded',
+		menuGanttTitle:'Gantt', menuHelpTitle:'Help', menuPrintTitle:'Print', menuExitTitle:'Close Project', menuLogout:'Logout' },
 	'ru': { operation:'Операция', phase:'Фаза', status:'Состояние', resourse:'Ресурс(ы)', version: 'Версия', uploadTime: 'Загружено',
 		expandColumn:'[]', Level:'Уровень', Name:'Название', Code:'Код', Start:'Старт', Fin:'Финиш', 
 		Notes:'Комментарий', status0:'Не начато', status100:'Завершено', statusNotFinished:'Не завершено',
@@ -202,7 +202,7 @@ export var _texts = {
 		enterUserDataMessage: 'USER DATA ВВОДЯТСЯ СЮДА',
 		errorUserData:'Введенные вами данные были искажены. Обратитесь к системному администратору!',
 		synchronizedMessage:'Все данные синхронизированы со Spider Project',
-		unsynchronizedMessage:'Данные, которые вы ввели, еще не были загружены в Spider Project!',
+		unsynchronizedMessage:'Данные, которые вы видите, изменились. Пожалуйста, перегрузите страницу!',
 		intError:'Ошибка: можно вводить только целые числа!',
 		floatError:'Ошибка: можно вводить только десятичные числа (цифры и десятчиную точку)!',
 		datetimeError:'Ошибка: недопустимый формат ввода даты!',
@@ -220,6 +220,6 @@ export var _texts = {
 		titlesRightTitle:'Нажмите, чтобы названия операций и фаз отображались сверху', 
 		titlesAboveTitle:'Нажмите, чтобы названия операций и фаз отображались справа',
 		titlesHiddenTitle:'Названия операций и фаз скрыты из-за слишком малого размера текста!',
-		titleNewProject:'Перегрузить страницу и сбросить все ее настройки. Используйте, если на сервер загружен новый проект',
-		menuGanttTitle:'Гантт', menuHelpTitle:'Помощь', menuPrintTitle:'Печать', menuLogout:'Выход' }
+		titleNewProject:'Перегрузить страницу, сбросив все ее настройки отображения. Используйте также если на сервер загружен новый проект',
+		menuGanttTitle:'Гантт', menuHelpTitle:'Помощь', menuPrintTitle:'Печать', menuExitTitle:'Закрыть проект', menuLogout:'Выход' }
 };

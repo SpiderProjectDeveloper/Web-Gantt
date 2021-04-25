@@ -9,13 +9,12 @@ import { isEditable, operToScreen, setVisibleTopAndHeightAfterExpand, setNewColu
 import { createRect, createSVG, createForeignObjectWithText, createCircle, createText, decColorToString  } from './utils.js';
 
 export function drawTableHeader( init=false, shiftOnly=false ) {
-    let thViewBox = `${_globals.tableViewBoxLeft} 0 ${_globals.tableHeaderSVGWidth} ${_globals.tableHeaderSVGHeight}`;
-    _globals.tableHeaderSVG.setAttributeNS(null,'viewBox',thViewBox);
-    if( shiftOnly ) {
-        return;
-    }   
-
-    calcTableHeaderOverallWidth();
+	let thViewBox = `${_globals.tableViewBoxLeft} 0 ${_globals.tableHeaderSVGWidth} ${_globals.tableHeaderSVGHeight}`;
+	_globals.tableHeaderSVG.setAttributeNS(null,'viewBox',thViewBox);
+	if( shiftOnly ) {
+			return;
+	}   
+	calcTableHeaderOverallWidth();
 	if( init ) {
 		while (_globals.tableHeaderSVG.hasChildNodes()) {
 			_globals.tableHeaderSVG.removeChild(_globals.tableHeaderSVG.lastChild);
@@ -155,7 +154,7 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
 
 		if( _globals.redrawAllMode ) {
-			if( !_data.activities[i].visible ) {
+			if( !_data.meta[i].visible ) {
 				continue;
 			}
 			let hiddenTop = (rectCounter+2) < _globals.visibleTop;
@@ -173,8 +172,8 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 
 		// Expand functionality [+] / [-]
 		let expand='';
-		if( _data.activities[i].expandable ) {
-			if( _data.activities[i].expanded ) {
+		if( _data.meta[i].expandable ) {
+			if( _data.meta[i].expanded ) {
 				expand='▼'; // ▼
  			} else {
 				expand= '►'; // ▶				
@@ -188,35 +187,35 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 				{ id:expandTextId, fontSize:fontSize, textAnchor:'middle', alignmentBaseline:'baseline' } );
 	 		document.getElementById('tableColumnSVG0').appendChild(expandText);
 	 		expandText.dataset.operationNumber=i;
-	 		if( _data.activities[i].expandable ) {
+	 		if( _data.meta[i].expandable ) {
 	 			expandText.style.cursor = 'pointer';
 		 		expandText.onmousedown = function(e) {
 		 			let operationNumber = Number(this.dataset.operationNumber); 
-		 			if( _data.activities[operationNumber].expanded == true ) {
+		 			if( _data.meta[operationNumber].expanded == true ) {
 		 				for( let iO = 0 ; iO < _data.activities.length ; iO++ ) {
-		 					for( let iP = 0 ; iP < _data.activities[iO].parents.length ; iP++ ) {
-		 	 					if( _data.activities[iO].parents[iP] == operationNumber ) {
-			 						_data.activities[iO].visible = false;
+		 					for( let iP = 0 ; iP < _data.meta[iO].parents.length ; iP++ ) {
+		 	 					if( _data.meta[iO].parents[iP] == operationNumber ) {
+			 						_data.meta[iO].visible = false;
 			 						break;
 			 					}
 			 				}
 			 			}
-		 				_data.activities[operationNumber].expanded = false;
+		 				_data.meta[operationNumber].expanded = false;
 		 			} else {
 		 				for( let iO = operationNumber+1 ; iO < _data.activities.length ; iO++ ) {
-		 					for( let iP = 0 ; iP < _data.activities[iO].parents.length ; iP++ ) {
-		 						let iParent = _data.activities[iO].parents[iP];
+		 					for( let iP = 0 ; iP < _data.meta[iO].parents.length ; iP++ ) {
+		 						let iParent = _data.meta[iO].parents[iP];
 		 	 					if( iParent == operationNumber ) {
-			 						_data.activities[iO].visible = true;
+			 						_data.meta[iO].visible = true;
 			 						break;
 			 					}
-			 					if( _data.activities[iParent].expandable && _data.activities[iParent].expanded == false ) {
+			 					if( _data.meta[iParent].expandable && _data.meta[iParent].expanded == false ) {
 			 						break;
 			 					}
 
 			 				}
 			 			}
-		 				_data.activities[operationNumber].expanded = true;
+		 				_data.meta[operationNumber].expanded = true;
 		 			}
 					setVisibleTopAndHeightAfterExpand();
 		 			drawTableContent();
@@ -238,13 +237,13 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 				let content = fmt.value; // _data.activities[i][ref];
 				let fontStyle = fmt.fontStyle; // null;
 				let fontWeight = fmt.fontWeight; // null;
-				let color = _data.activities[i].colorFont; // _settings.tableContentStrokeColor;
+				let color = _data.meta[i].colorFont; // _settings.tableContentStrokeColor;
 
 				let columnWidthToUse = _data.table[col].width - _settings.tableColumnHMargin*2;
 
 				let tableColumnSVG = document.getElementById('tableColumnSVG'+col);
 				let bkgr = createRect( 0, lineTop, columnWidthToUse, rectHeight,  
-					{ id:('tableColumn'+col+'Row'+i+'Bkgr'), fill:_data.activities[i].colorBack } );
+					{ id:('tableColumn'+col+'Row'+i+'Bkgr'), fill:_data.meta[i].colorBack } );
 				tableColumnSVG.appendChild( bkgr );
 
 				let textX = _settings.tableColumnTextMargin;
@@ -351,20 +350,20 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 			}
 		}
 
-		if( _data.activities[i].visible && expandText.style.display == 'none' && (fontSize >= _settings.tableMinFontSize) ) {
+		if( _data.meta[i].visible && expandText.style.display == 'none' && (fontSize >= _settings.tableMinFontSize) ) {
 			for( let col = 0 ; col < _data.table.length ; col++ ) {
 				let id = 'tableColumn'+col+'Row'+i;
 				let el = document.getElementById(id);
 				el.setAttributeNS(null,'display','block');
 			}
-		} else if( (!_data.activities[i].visible && expandText.style.display != 'none') || (fontSize < _settings.tableMinFontSize) ) {
+		} else if( (!_data.meta[i].visible && expandText.style.display != 'none') || (fontSize < _settings.tableMinFontSize) ) {
 			for( let col = 0 ; col < _data.table.length ; col++ ) {
 				let id = 'tableColumn'+col+'Row'+i;
 				let el = document.getElementById(id);
 				el.setAttributeNS(null,'display','none');
 			}
 		}		
-		if( _data.activities[i].visible ) {
+		if( _data.meta[i].visible ) {
 			rectCounter += 1;
 		}				
 	}

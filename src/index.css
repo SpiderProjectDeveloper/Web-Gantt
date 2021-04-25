@@ -2,8 +2,10 @@
 	--header-height:40px;
 	--half-header-height:calc( var(--header-height) / 2 );
 	--two-fifth-header-height:calc( 2 * var(--header-height) / 5 );
-    --header-font-size:calc( 4 * var(--header-height) / 13 );
-    --menu-width: calc( var(--header-height) * 2 );
+  --header-font-size:calc( 4 * var(--header-height) / 13 );
+  --menu-width: calc( var(--header-height) * 2.25 );
+	--header-icon-height: calc( var(--header-height) * 0.55 );
+	--header-icon-bottom-margin: calc( var(--header-height) * 0.35 );
 	--toolbox-table-height:28px;
 	--toolbox-td-height:calc( var(--toolbox-table-height) - 2px );
 	--toolbox-font-size:calc( var(--toolbox-table-height) - 10px );
@@ -181,9 +183,6 @@ div#toolboxExpandDiv input {
 }
 div#toolboxSeparator { margin:0px 4px 0px 4px; }
 
-div#toolboxSynchronizedDiv { background-color:white; }
-#toolboxSynchronizedIcon { border:0; cursor:default; }
-
 #toolboxZoomHorizontallyDiv, #toolboxZoomVerticallyDiv, #toolboxExpandDiv { 
     padding-right:0px; 
 } 
@@ -196,6 +195,16 @@ div#toolboxSynchronizedDiv { background-color:white; }
 #toolboxExpandPlusIcon, #toolboxExpandMinusIcon { 
     margin-left:4px; margin-right:4px; 
 }
+
+#synchronizedDiv {
+	position:relative; display: inline-block; 
+}
+#synchronizedIcon {
+	display:block; float:left; height:var(--header-icon-height); max-height:var(--header-icon-height); 
+	margin:0px 0px var(--header-icon-bottom-margin) 0px; padding:0px 2px 2px; border:none; 
+	background-color:rgba(255,255,255,0); color: #dfdfdf; cursor: help;
+}
+
 
 #pageContent {
     width:100%; top:var(--header-height);

@@ -18,17 +18,15 @@ app.get('/bundle.js', (req, res) => {
   res.sendFile(path.resolve(__dirname, 'dist/bundle.js'));
 });
 
-app.get('/data.php', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'public/data.php'));
-});
-
-app.get('/.gantt_data', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'public/gantt.json'));
-});
-
-app.get('/user_data.csv.php', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'public/user_data.csv.php'));
-});
+			app.get('/.gantt_data', (req, res) => {
+			  res.sendFile(path.resolve(__dirname, 'public/data.php'));
+			});
+			app.get('/.check_gantt_synchro', (req, res) => {
+				res.send( JSON.stringify( { synchronized:1 } ) );
+			});
+			app.post('/.save_gantt', (req, res) => {
+				res.send( JSON.stringify( { errcode:0 } ) );
+			});
 
 app.get('/server.php', (req, res) => {
 	if( req.query.action == 'check_synchronization' ) {

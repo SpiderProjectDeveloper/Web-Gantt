@@ -82,7 +82,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 	let operationHeight = operToScreen(1) - operToScreen(0);
 	let rectHeight = operToScreen(1.0 - rectBottomMargin) - operToScreen(rectTopMargin);
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
-		if( !_data.activities[i].visible ) {
+		if( !_data.meta[i].visible ) {
 			_data.activities[i].onScreen = false;
 			continue;
 		}
@@ -127,8 +127,8 @@ export function drawGantt( init=false, shiftOnly=false ) {
 			continue;
 		}
 		//console.log(`i = ${i}, predOp=${predOp}, succOp=${succOp}`);
-		let atLeastOneOpOnScreen = (_data.activities[predOp].onScreen || _data.activities[succOp].onScreen)&&(_data.activities[predOp].visible && _data.activities[succOp].visible); 
-		// let bothOpsAreVisible = _data.activities[predOp].visible && _data.activities[succOp].visible; // MAY BE DELETED!
+		let atLeastOneOpOnScreen = (_data.activities[predOp].onScreen || _data.activities[succOp].onScreen)&&(_data.meta[predOp].visible && _data.meta[succOp].visible); 
+		// let bothOpsAreVisible = _data.meta[predOp].visible && _data.meta[succOp].visible; // MAY BE DELETED!
 		if( !atLeastOneOpOnScreen ) {
 			continue;
 		}
@@ -155,7 +155,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 
 		if( init ) {
 			lineProperties.id = 'ganttLine'+i;
-			//console.log(`creating a line in a drawGantt: predOp=${predOp}, visible=${_data.activities[predOp].visible}, succOp=${succOp}, visible=${_data.activities[succOp].visible}`);
+			//console.log(`creating a line in a drawGantt: predOp=${predOp}, visible=${_data.meta[predOp].visible}, succOp=${succOp}, visible=${_data.meta[succOp].visible}`);
 			//console.log(`creating a line in a drawGantt: predOp=${predOp}, onscr=${_data.activities[predOp].onScreen}, succOp=${succOp}, onscr=${_data.activities[succOp].onScreen}`);
 			//console.log(`lineX1=${lineX1}, lineY1=${lineY1}, lineX2=${lineX2}, lineY2=${lineY2}`);
 			line = createLine( lineX1, lineY1, lineX2, lineY2, lineProperties );
@@ -175,7 +175,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 			arrowLine.setAttributeNS(null,'y1',lineY2);
 			arrowLine.setAttributeNS(null,'y2',arrowY);
 		}
-		if( !_data.activities[predOp].visible || !_data.activities[succOp].visible || !_globals.displayLinksOn ) {
+		if( !_data.meta[predOp].visible || !_data.meta[succOp].visible || !_globals.displayLinksOn ) {
 			line.setAttributeNS(null,'display','none');
 			arrowLine.setAttributeNS(null,'display','none');
 		} else {				
@@ -189,7 +189,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 	let op100Properties = { fill:_settings.ganttOperation100Color, opacity:_settings.ganttOperation100Opacity };
 	let opCompareProperties = { fill:_settings.ganttCompareColor, opacity:_settings.ganttCompareOpacity };
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
-		if( !_data.activities[i].onScreen && !_data.activities[i].visible ) {
+		if( !_data.activities[i].onScreen && !_data.meta[i].visible ) {
 			continue;
 		}		
 		let rectStart = _data.activities[i].left;
@@ -251,10 +251,10 @@ export function drawGantt( init=false, shiftOnly=false ) {
 				let op0;
 				op0Properties.id = 'ganttOpNotStarted'+i;
 				// op0Properties.fill = (_data.activities[i].f_Critical=="1") ? _settings.ganttCriticalColor : _settings.ganttOperation0Color;
-				op0Properties.fill = _data.activities[i].color;
+				op0Properties.fill = _data.meta[i].color;
 				if( !(rectWidth > 0) ) {
 					op0 = createRhomb( rectStart, rectTop, rectHeight, op0Properties );
-				} else if( !_data.activities[i]._isPhase ) { // Not a phase ?
+				} else if( !_data.meta[i].isPhase ) { // Not a phase ?
 					op0 = createRect( rectStart, rectTop, rectWidth, rectHeight, op0Properties ); // Rectangle
 				} else {
 					op0 = createPolygon( calcPhaseCoords( rectStart, rectTop, rectWidth, rectHeight), op0Properties );
@@ -265,7 +265,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 				op100Properties.id = 'ganttOpFinished'+i;
 				if( !(rectWidth > 0) ) {
 					op100 = createRhomb( rectStart, rectTop, rectHeight, op100Properties );
-				} else if( !_data.activities[i]._isPhase ) { // Not a phase
+				} else if( !_data.meta[i].isPhase ) { // Not a phase
 					op100 = createRect( rectStart, rectTop, rectWidth, rectHeight, op100Properties ); // Rectangle
 				} else {
 					op100 = createPolygon( calcPhaseCoords( rectStart, rectTop, rectWidth, rectHeight ), op100Properties );
@@ -279,7 +279,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 				let width100 = xLastFin - rectStart;
 				if( !(width100 > 0) ) {
 					op100 = createRhomb( rectStart, rectTop, rectHeight, op100Properties );
-				} else if( !_data.activities[i]._isPhase ) { // Not a phase
+				} else if( !_data.meta[i].isPhase ) { // Not a phase
 					op100 = createRect( rectStart, rectTop, width100, rectHeight, op100Properties  ); // Rectangle
 				} else {
 					op100 = createPolygon( calcPhaseCoords(rectStart, rectTop, width100, rectHeight,-1), op100Properties );
@@ -293,12 +293,12 @@ export function drawGantt( init=false, shiftOnly=false ) {
 				} 
 				
 				op0Properties.id = 'ganttOpNotStarted'+i;
-				op0Properties.fill = _data.activities[i].color;
+				op0Properties.fill = _data.meta[i].color;
 				let op0;
 				let width0 = rectEnd - xRestart;
 				if( !(width0 > 0) ) {
 					op0 = createRhomb( rectEnd, rectTop, rectHeight, op0Properties );
-				} else if( !_data.activities[i]._isPhase ) { // Not a phase
+				} else if( !_data.meta[i].isPhase ) { // Not a phase
 					op0 = createRect( xRestart, rectTop, width0, rectHeight, op0Properties  ); // Rectangle
 				} else {
 					op0 = createPolygon( calcPhaseCoords(xRestart, rectTop, width0, rectHeight, 1), op0Properties );
@@ -306,7 +306,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 				group.appendChild(op0);
 			}
 			// group.onmouseover = function(e) { document.getElementById('tableColumn0Row'+i).setAttributeNS(null,'fill','#2f2f2f') };
-			// let bkgr = createRect( 0, lineTop, _data.table[col].width, rectHeight, { id:('tableColumn'+col+'Row'+i+'Bkgr'), fill:_data.activities[i].colorBack } );
+			// let bkgr = createRect( 0, lineTop, _data.table[col].width, rectHeight, { id:('tableColumn'+col+'Row'+i+'Bkgr'), fill:_data.meta[i].colorBack } );
 
 			let title = document.createElementNS( _settings.NS,'title' ); // Title
 			title.setAttributeNS(null, 'id', 'ganttGroupTitle'+i);
@@ -345,7 +345,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 				let el = document.getElementById('ganttOpNotStarted'+i);
 				if( !(rectWidth > 0) ) {
 					el.setAttributeNS( null,'points', calcRhombCoords( rectStart, rectTop, rectHeight ) );
-				} else if( !_data.activities[i]._isPhase ) { // Not a phase
+				} else if( !_data.meta[i].isPhase ) { // Not a phase
 					setRectCoords( el, rectStart, rectTop, rectWidth, rectHeight );
 				} else {
 					el.setAttributeNS( null,'points', calcPhaseCoords(rectStart, rectTop, rectWidth, rectHeight) );
@@ -354,7 +354,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 				let el = document.getElementById('ganttOpFinished'+i);
 				if( !(rectWidth > 0) ) {
 					el.setAttributeNS( null,'points', calcRhombCoords( rectStart, rectTop, rectHeight ) );
-				} else if( !_data.activities[i]._isPhase ) { // Not a phase
+				} else if( !_data.meta[i].isPhase ) { // Not a phase
 					setRectCoords( el, rectStart, rectTop, rectWidth, rectHeight );
 				} else {
 					el.setAttributeNS( null,'points', calcPhaseCoords(rectStart, rectTop, rectWidth, rectHeight) );
@@ -368,7 +368,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 				let el0 = document.getElementById('ganttOpNotStarted'+i);
 				if( !(width100 > 0) ) { // Zero width
 					el100.setAttributeNS( null,'points', calcRhombCoords( rectStart, rectTop, rectHeight ) );					
-				} else if( !_data.activities[i]._isPhase ) { // Not a phase
+				} else if( !_data.meta[i].isPhase ) { // Not a phase
 					setRectCoords( el100, rectStart, rectTop, width100, rectHeight );
 				} else {
 					el100.setAttributeNS( null,'points', calcPhaseCoords(rectStart, rectTop, width100, rectHeight,-1) );
@@ -380,7 +380,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 				if( !(width0 > 0) ) { // Zero width
 					el0.setAttributeNS( null,'points', calcRhombCoords( rectEnd, rectTop, rectHeight ) );					
 				}
-				if( !_data.activities[i]._isPhase ) { // Not a phase
+				if( !_data.meta[i].isPhase ) { // Not a phase
 					setRectCoords( el0, xRestart, rectTop, width0, rectHeight );
 				} else {
 					el0.setAttributeNS( null,'points', calcPhaseCoords(xRestart, rectTop, width0, rectHeight,1) );
@@ -395,7 +395,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 		}
 
 		let group = document.getElementById('ganttGroup'+i); // Hiding or showing the group.
-		if( !_data.activities[i].visible ) {
+		if( !_data.meta[i].visible ) {
 			group.setAttributeNS(null,'display','none');
 		} else {
 			_data.activities[i].left = rectStart;

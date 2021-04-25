@@ -66,7 +66,7 @@ export function onWindowMouseUp(e) {
 			let width = parseInt( el.getAttributeNS( null, 'width' ) ); 
 			if( e.x > x && e.x < (x + width) ) {
 				if( from != col ) {
-                    moveColumnOfTable( from, col );
+          moveColumnOfTable( from, col );
 					drawTableHeader(true);
 					drawTableContent(true);					
 					for( let cookie = 0 ; cookie < _data.table.length ; cookie++ ) { // Updating cookies according to new column sort order.

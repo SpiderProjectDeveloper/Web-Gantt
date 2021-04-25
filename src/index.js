@@ -19,6 +19,7 @@ import { drawAll, calculateHorizontalZoomByVerticalZoom, displayLinksStatus, zoo
 import { getCookie, setCookie, deleteCookie, createDefs, csvIntoJSON, dateIntoSpiderDateString, decColorToString, 
 	copyArrayOfObjects, trimString, filterInput, digitsOnly } from './utils.js';
 import { initMenu } from './menu.js';
+import { ifSynchronized } from './synchro.js';
 
 // Attaching to the html container element
 let script = document.getElementById('bundle');
@@ -39,7 +40,7 @@ if( appContainer ) {
 initGlobals(appContainer, user);
 
 window.addEventListener( "load", onWindowLoad );
-window.addEventListener( "resize", onWindowResize );
+window.addEventListener( 'resize', function() { location.reload(); } );
 
 if( !_globals.touchDevice ) {
 	window.addEventListener( "contextmenu", onWindowContextMenu );
@@ -71,26 +72,10 @@ function loadData() {
 		var xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
 		    if ( this.readyState == 4 ) { 
-                // A debug code!
-                /*
-                let t = "{ \"project\": { \"Code\":\"sp\", \"Name\":\"Приобретение программы\",\"Version\":\"1\",\"CurTime\":1169010000,\"Notes\":\"Тестовый проект\" },\"parameters\": { \"language\":\"ru\", \"dateFormat\":\"\", \"dateDelim\":\".\", \"timeDelim\":\":\", \"secondsInPixel\":30000, \"expandToLevelAtStart\":3, \"uploadTime\":1603123121 },\"activities\": [{\"Level\":1,\"Code\":\"main\",\"N\":\"65408\",\"Name\":\"Приобретение программы\",\"Person\":null,\"Notes\":null,\"Start\":1168318800,\"AsapStart\":1169010000,\"AsapFin\":1176103800,\"FactStart\":1168318800,\"FactFin\":null,\"f_FontColor\":null,\"f_LastFin\":1168952400,\"f_ColorCom\":\"11534336\",\"f_ColorBack\":\"13233656\"},{\"Level\":2,\"Code\":\"Груша\",\"N\":\"65408\",\"Name\":\"Требования и рынок\",\"Person\":\"ivanov, petrov\",\"Notes\":null,\"Start\":1168318800,\"AsapStart\":1169010000,\"AsapFin\":1173801600,\"FactStart\":1168318800,\"FactFin\":null,\"f_FontColor\":\"255\",\"f_LastFin\":1168952400,\"f_ColorCom\":\"53760\",\"f_ColorBack\":\"13434828\"}],\"table\": [{\"name\":\"Уровень\",\"ref\":\"Level\",\"visible\":true,\"width\":2,\"type\":\"int\", \"format\":0},{\"name\":\"Код\",\"ref\":\"Code\",\"visible\":true,\"width\":17,\"type\":\"string\", \"format\":2},{\"name\":\"Пользовательское поле N\",\"ref\":\"N\",\"visible\":true,\"width\":17,\"type\":\"signal\", \"format\":1},{\"name\":\"Название\",\"ref\":\"Name\",\"visible\":true,\"width\":40,\"type\":\"string\", \"format\":0}, {\"name\":\"Менеджер\",\"ref\":\"Person\",\"visible\":true,\"width\":17,\"type\":\"string\", \"format\":0},{\"name\":\"Комментарии\",\"ref\":\"Notes\",\"visible\":true,\"width\":17,\"type\":\"text\", \"format\":0, \"editable\":true},{\"name\":\"Начало\",\"ref\":\"Start\",\"visible\":true,\"width\":17,\"type\":\"datetime\", \"format\":1}],\"links\": [ {\"PredCode\":\"spamrd01\",\"SuccCode\":\"spamrd04\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spamrd02\",\"SuccCode\":\"spamrd04\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spamrd04\",\"SuccCode\":\"spammr03\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscsa03\",\"SuccCode\":\"spscsa04\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscsa04\",\"SuccCode\":\"spscic01\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscsa04\",\"SuccCode\":\"spscic02\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscnc01\",\"SuccCode\":\"spscnc02\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscnc02\",\"SuccCode\":\"spscnc03\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spammr03\",\"SuccCode\":\"spscsa01\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscsa01\",\"SuccCode\":\"spscsa02\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscsa01\",\"SuccCode\":\"spscsa03\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscic02\",\"SuccCode\":\"spscnc01\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscic01\",\"SuccCode\":\"spscnc01\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spamrd03\",\"SuccCode\":\"spamrd04\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spamrd01\",\"SuccCode\":\"spamrd03\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spamrd02\",\"SuccCode\":\"spamrd03\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spammr01\",\"SuccCode\":\"spammr02\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spammr02\",\"SuccCode\":\"spammr03\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscsa02\",\"SuccCode\":\"spscsa05\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscsa05\",\"SuccCode\":\"spscsa04\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spamrd01\",\"SuccCode\":\"ww\",\"TypeSF2\":\"SS\"}, {\"PredCode\":\"spammr03\",\"SuccCode\":\"ww\",\"TypeSF2\":\"FF\"}, {\"PredCode\":\"spscsa01\",\"SuccCode\":\"spsc01\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spscnc03\",\"SuccCode\":\"spsc01\",\"TypeSF2\":\"FF\"}, {\"PredCode\":\"spamrd02\",\"SuccCode\":\"ww\",\"TypeSF2\":\"SS\"}, {\"PredCode\":\"spamrd01\",\"SuccCode\":\"spscnc03\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spamrd02\",\"SuccCode\":\"spscnc03\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spamrd01\",\"SuccCode\":\"spammr01\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spamrd01\",\"SuccCode\":\"spammr01\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spamrd01\",\"SuccCode\":\"spammr01\",\"TypeSF2\":\"FF\"}, {\"PredCode\":\"spamrd01\",\"SuccCode\":\"spammr01\",\"TypeSF2\":\"FS\"}, {\"PredCode\":\"spamrd01\",\"SuccCode\":\"03\",\"TypeSF2\":\"SS\"}, {\"PredCode\":\"spammr03\",\"SuccCode\":\"03\",\"TypeSF2\":\"FF\"}, {\"PredCode\":\"spamrd02\",\"SuccCode\":\"03\",\"TypeSF2\":\"SS\"}],\"lang\":\"ru\"}";
-                setData( JSON.parse(t) );
-                hideMessageBox();
-                initGlobalsWithDataParameters();
-                if( initData() == 0 ) {
-                    if( !('editables' in _data) || _data.editables.length == 0 ) {
-                        _data.noEditables = true;
-                    } else {
-                        _data.noEditables = false;
-                        createEditBoxInputs();
-                    }		
-                    displayData();
-                }
-                */
 		    	if( this.status == 200 ) {
 			    	let errorParsingData = false;
-			    	try{
-				        setData( JSON.parse(this.responseText) ); // TO UNCOMMENT!!!!
+			    	try {
+				      setData( JSON.parse(this.responseText) ); // TO UNCOMMENT!!!!
 			    	} catch(e) {
 			    		console.log('Error: ' + e.name + ":" + e.message + "\n" + e.stack + "\n" + e.cause);
 			    		errorParsingData = true;
@@ -98,34 +83,35 @@ function loadData() {
 			    	if( errorParsingData ) { // To ensure data are parsed ok... // alert(this.responseText);
 						displayMessageBox( _texts[_globals.lang].errorParsingData ); 
 						return;
-			    	}
+			    }
 					// if( 'ontouchstart' in document.documentElement ) { // To find out is it a touch device or not...
 					//	_globals.touchDevice = true;
 					// }
-                    hideMessageBox();
-                    initGlobalsWithDataParameters();
+					hideMessageBox();
+					initGlobalsWithDataParameters();
 
-			    	if( !('activities' in _data) || _data.activities.length == 0 ) {
+					if( !('activities' in _data) || _data.activities.length == 0 ) {
 						displayMessageBox( _texts[_globals.lang].errorParsingData ); 
 						return;
-                    }
-                    if( initData() == 0 ) {
-                        if( !('editables' in _data) || _data.editables.length == 0 ) {
-                            _data.noEditables = true;
-                        } else {
-                            _data.noEditables = false;
-                            createEditBoxInputs();
-                        }		
-                        displayData();
-                    } else {
-                        displayMessageBox( _texts[_globals.lang].errorLoadingData ); 
-                    }                        
+					}
+					if( initData() == 0 ) {
+						if( !('editables' in _data) || _data.editables.length == 0 ) {
+								_data.noEditables = true;
+						} else {
+								_data.noEditables = false;
+								createEditBoxInputs();
+						}		
+						displayData();
+						ifSynchronized();
+					} else {
+						displayMessageBox( _texts[_globals.lang].errorLoadingData ); 
+					}                        
 				} else {
 					displayMessageBox( _texts[_globals.lang].errorLoadingData ); 
 				}
-		    }
-        };
-		let requestUrl = _settings.urlData + window.location.search;         
+		  }
+    };
+		let requestUrl = _settings.urlData + '?' + _globals.projectId;         
 		xmlhttp.open("GET", requestUrl, true);
 		xmlhttp.setRequestHeader("Cache-Control", "no-cache");
 		xmlhttp.send();
@@ -155,14 +141,13 @@ function initData() {
 		_globals.redrawAllMode = true;
 	}
 
-    initDataHelpers();
-
 	// Retrieving dates of operations, calculating min. and max. dates.
 	_data.startMinInSeconds = -1;
 	_data.finMaxInSeconds = -1;
-	_data.startFinSeconds = -1
-
+	_data.startFinSeconds = -1;
+	_data.meta = new Array(_data.activities.length);
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
+		_data.meta[i] = {};
 		let d = _data.activities[i];
 		if( typeof(d.AsapStart) !== 'undefined' && d.AsapStart !== null ) {
 			d.AsapStartInSeconds = d.AsapStart;
@@ -251,12 +236,15 @@ function initData() {
 				d.displayRestartInSeconds = d.AsapStartInSeconds;
 			}
 		}
-		d.color = decColorToString( d.f_ColorCom, _settings.ganttOperation0Color );
-		d.colorBack = decColorToString( d.f_ColorBack, "#ffffff" );
-		d.colorFont = decColorToString( d.f_FontColor, _settings.tableContentStrokeColor );
-        if( !('Level' in d) ) {
-            d.Level = null;
-        } else if( typeof( d.Level ) === 'string' ) {
+		_data.meta[i].color = decColorToString( d.f_ColorCom, _settings.ganttOperation0Color );
+		//d.color = decColorToString( d.f_ColorCom, _settings.ganttOperation0Color );
+		_data.meta[i].colorBack = decColorToString( d.f_ColorBack, "#ffffff" );
+		//d.colorBack = decColorToString( d.f_ColorBack, "#ffffff" );
+		_data.meta[i].colorFont = decColorToString( d.f_FontColor, _settings.tableContentStrokeColor );
+		//d.colorFont = decColorToString( d.f_FontColor, _settings.tableContentStrokeColor );
+		if( !('Level' in d) ) {
+				d.Level = null;
+		} else if( typeof( d.Level ) === 'string' ) {
 			if( digitsOnly(d.Level) ) {
 				d.Level = parseInt(d.Level);
 			}
@@ -276,16 +264,16 @@ function initData() {
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
 		_data.activities[i].id = 'ganttRect' + i; // Id
 		initParents(i);
-		_data.activities[i]._isPhase = (typeof(_data.activities[i].Level) === 'number') ? true : false;
-		_data.activities[i].hasLinks = false;
+		_data.meta[i].isPhase = (typeof(_data.activities[i].Level) === 'number') ? true : false;
+		_data.meta[i].hasLinks = false;
 	}
 
 	// Marking 'expandables'
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
 		let hasChild = false;
 		for( let j = i+1 ; j < _data.activities.length ; j++ ) {
-			for( let k = 0 ; k < _data.activities[j].parents.length ; k++ ) {
-				if( _data.activities[j].parents[k] == i ) { // If i is a parent of j
+			for( let k = 0 ; k < _data.meta[j].parents.length ; k++ ) {
+				if( _data.meta[j].parents[k] == i ) { // If i is a parent of j
 					hasChild = true;
 					break;
 				}
@@ -295,19 +283,19 @@ function initData() {
 			}
 		}
 		if( hasChild ) {
-			_data.activities[i].expanded = true;
-			_data.activities[i].expandable = true;
+			_data.meta[i].expanded = true;
+			_data.meta[i].expandable = true;
 		} else {
-			_data.activities[i].expanded = true;			
-			_data.activities[i].expandable = false;
+			_data.meta[i].expanded = true;			
+			_data.meta[i].expandable = false;
 		}
-		_data.activities[i].visible = true;
+		_data.meta[i].visible = true;
 	}
 
 	// Searching for the deepest level... 
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
-		if( _data.activities[i].parents.length >= _globals.maxExpandableLevel ) {
-			_globals.maxExpandableLevel =  _data.activities[i].parents.length + 1;
+		if( _data.meta[i].parents.length >= _globals.maxExpandableLevel ) {
+			_globals.maxExpandableLevel =  _data.meta[i].parents.length + 1;
 		}
 	}
 	_globals.expandInput.value = _globals.maxExpandableLevel; 	// To init the input, that allows futher changing expand level
@@ -336,25 +324,17 @@ function initData() {
 		if( predOp != -1 && succOp != -1 ) {
 			_data.links[l].predOp = predOp;
 			_data.links[l].succOp = succOp;
-			_data.activities[predOp].hasLinks = true;
-			_data.activities[succOp].hasLinks = true;			
+			_data.meta[predOp].hasLinks = true;
+			_data.meta[succOp].hasLinks = true;			
 		} else {
 			_data.links[l].predOp = null;
 			_data.links[l].succOp = null;
 		}
-
 	}
 
-	// Handling table columns widths
-	for( let col = 0 ; col < _data.table.length ; col++ ) { // Recalculating widths in symbols into widths in points 
-        let add = _settings.tableColumnHMargin*2 + _settings.tableColumnTextMargin*2;
-        let isWid = ('widthsym' in _data.table[col] && _data.table[col].widthsym !== null );
-		_data.table[col].width = (isWid) ? (_data.table[col].widthsym * _settings.tableMaxFontSize*0.5 + add) : 5;
-	}
-	_data.initialTable = []; // Saving table settings loaded from a local version of Spider Project
-	copyArrayOfObjects( _data.table, _data.initialTable );
+  initDataHelpers();
 
-    readCustomSettings();
+	readCustomSettings();
 
 	calcNotHiddenOperationsLength();
 
@@ -373,34 +353,34 @@ function initData() {
 	return(0);
 }
 
-
+// activities\[([0-9a-zA-Z]+)\]\.parents   meta[$1].parents
 function initParents( iOperation ) {
-	_data.activities[iOperation].parents = []; // Initializing "parents"
+	_data.meta[iOperation].parents = []; // Initializing "parents"
 	for( let i = iOperation-1 ; i >= 0 ; i-- ) {
-		let l = _data.activities[iOperation].parents.length;
+		let l = _data.meta[iOperation].parents.length;
 		let currentLevel;
 		if( l == 0 ) {
 			currentLevel = _data.activities[iOperation].Level;
 		} else {
-			let lastPushedIndex = _data.activities[iOperation].parents[l-1];
+			let lastPushedIndex = _data.meta[iOperation].parents[l-1];
 			currentLevel = _data.activities[lastPushedIndex].Level;
 		}
 		if( currentLevel === null || currentLevel === 'P' ) { // Current level is an operation
 			if( typeof(_data.activities[i].Level) === 'number' ) {
-				_data.activities[iOperation].parents.push(i);
+				_data.meta[iOperation].parents.push(i);
 			}
 		} else if( typeof(currentLevel) === 'number' ) { // Current level is a phase
 			if( typeof(_data.activities[i].Level) === 'number' ) {
 				if( _data.activities[i].Level < currentLevel ) { // _data.activities[iOperation].Level ) {
-					_data.activities[iOperation].parents.push(i);
+					_data.meta[iOperation].parents.push(i);
 				}
 			}
 		} else if( typeof(currentLevel) === 'string' ) { // Current level is a team or resourse or a project
 			if( _data.activities[i].Level === null ) { // The upper level element is an operation
-				_data.activities[iOperation].parents.push(i);
+				_data.meta[iOperation].parents.push(i);
 			} else if( currentLevel == 'A' ) {
 				if( _data.activities[i].Level === 'T' ) { // The upper level element is a team
-					_data.activities[iOperation].parents.push(i);
+					_data.meta[iOperation].parents.push(i);
 				}
 			}
 		}
@@ -466,12 +446,12 @@ function initLayout() {
 		_globals.zoomVerticallyInput.addEventListener('blur', function(e) { onZoomVerticallyBlur(this); } );
 		_globals.zoomVerticallyIcon.addEventListener('mousedown', 
 			function(e) { onZoomVerticallyIcon(this, e, _globals.zoomVerticallyInput); } );
-	    _globals.zoomVerticallyMinusIcon.setAttribute( 'style', 'display:none' );
-	    _globals.zoomVerticallyPlusIcon.setAttribute( 'style', 'display:none' );
+		_globals.zoomVerticallyMinusIcon.setAttribute( 'style', 'display:none' );
+		_globals.zoomVerticallyPlusIcon.setAttribute( 'style', 'display:none' );
 
 		_globals.expandIcon.addEventListener('mousedown', function(e) { onExpandIcon(this, e); } );
-	    _globals.expandMinusIcon.setAttribute( 'style', 'display:none' );
-	    _globals.expandPlusIcon.setAttribute( 'style', 'display:none' );
+		_globals.expandMinusIcon.setAttribute( 'style', 'display:none' );
+		_globals.expandPlusIcon.setAttribute( 'style', 'display:none' );
 		_globals.expandInput.addEventListener('input', function(e) { filterInput(this,'([^0-9]+)',1,100,1); } );
 		_globals.expandInput.addEventListener('blur', function(e) { onExpandBlur(); } );
 	} else {
@@ -525,36 +505,36 @@ function displayHeaderAndFooterInfo() {
 	}
     initMenu();
 
-	document.getElementById('toolboxResetTableDimensionsDiv').title = _texts[_globals.lang].resetTableDimensionsTitle;
-	document.getElementById('toolboxResetTableDimensionsDiv').onlick = restoreExportedSettings;
-	document.getElementById('toolboxResetTableDimensionsIcon').setAttribute('src',_icons.exportSettings);
-	document.getElementById('toolboxZoom100Div').title = _texts[_globals.lang].zoom100Title;
-	document.getElementById('toolboxZoom100Div').onclick = function(e) { zoom100(e); };
-	document.getElementById('toolboxZoom100Icon').setAttribute('src',_icons.zoom100);
-	document.getElementById('toolboxZoomReadableDiv').title = _texts[_globals.lang].zoomReadableTitle;
-	document.getElementById('toolboxZoomReadableDiv').onclick = function(e) { zoomReadable(e); };
-	document.getElementById('toolboxZoomReadableIcon').setAttribute('src',_icons.zoomReadable);
+	_globals.resetTableDimensionsDiv.title = _texts[_globals.lang].resetTableDimensionsTitle;
+	_globals.resetTableDimensionsDiv.onclick = restoreExportedSettings;
+	_globals.resetTableDimensionsIcon.setAttribute('src',_icons.exportSettings);
+	_globals.zoom100Div.title = _texts[_globals.lang].zoom100Title;
+	_globals.zoom100Div.onclick = function(e) { zoom100(e); };
+	_globals.zoom100Icon.setAttribute('src',_icons.zoom100);
+	_globals.zoomReadableDiv.title = _texts[_globals.lang].zoomReadableTitle;
+	_globals.zoomReadableDiv.onclick = function(e) { zoomReadable(e); };
+	_globals.zoomReadableIcon.setAttribute('src',_icons.zoomReadable);
 
-	document.getElementById('toolboxZoomVerticallyDiv').title = _texts[_globals.lang].zoomVerticallyTitle;
-	document.getElementById('toolboxZoomVerticallyIcon').setAttribute('src',_icons.zoomVertically);
-	document.getElementById('toolboxZoomVerticallyPlusIcon').setAttribute('src',_icons.zoomVerticallyPlus);
-	document.getElementById('toolboxZoomVerticallyMinusIcon').setAttribute('src',_icons.zoomVerticallyMinus);
+	_globals.zoomVerticallyDiv.title = _texts[_globals.lang].zoomVerticallyTitle;
+	_globals.zoomVerticallyIcon.setAttribute('src',_icons.zoomVertically);
+	_globals.zoomVerticallyPlusIcon.setAttribute('src',_icons.zoomVerticallyPlus);
+	_globals.zoomVerticallyMinusIcon.setAttribute('src',_icons.zoomVerticallyMinus);
 
-	document.getElementById('toolboxZoomHorizontallyDiv').title = _texts[_globals.lang].zoomHorizontallyTitle;
-	document.getElementById('toolboxZoomHorizontallyIcon').setAttribute('src',_icons.zoomHorizontally);
-	document.getElementById('toolboxZoomHorizontallyPlusIcon').setAttribute('src',_icons.zoomHorizontallyPlus);
-	document.getElementById('toolboxZoomHorizontallyMinusIcon').setAttribute('src',_icons.zoomHorizontallyMinus);
+	_globals.zoomHorizontallyDiv.title = _texts[_globals.lang].zoomHorizontallyTitle;
+	_globals.zoomHorizontallyIcon.setAttribute('src',_icons.zoomHorizontally);
+	_globals.zoomHorizontallyPlusIcon.setAttribute('src',_icons.zoomHorizontallyPlus);
+	_globals.zoomHorizontallyMinusIcon.setAttribute('src',_icons.zoomHorizontallyMinus);
 
-	document.getElementById('toolboxExpandAllIcon').title = _texts[_globals.lang].expandAllIconTitle;
-	document.getElementById('toolboxExpandAllIcon').setAttribute('src',_icons.expandAll);
-	document.getElementById('toolboxExpandDiv').title = _texts[_globals.lang].expandTitle;
-	document.getElementById('toolboxExpandIcon').setAttribute('src',_icons.expand);
-	document.getElementById('toolboxExpandPlusIcon').setAttribute('src',_icons.expandPlus);
-	document.getElementById('toolboxExpandMinusIcon').setAttribute('src',_icons.expandMinus);
+	_globals.expandAllIcon.title = _texts[_globals.lang].expandAllIconTitle;
+	_globals.expandAllIcon.setAttribute('src',_icons.expandAll);
+	_globals.expandDiv.title = _texts[_globals.lang].expandTitle;
+	_globals.expandIcon.setAttribute('src',_icons.expand);
+	_globals.expandPlusIcon.setAttribute('src',_icons.expandPlus);
+	_globals.expandMinusIcon.setAttribute('src',_icons.expandMinus);
 
-	document.getElementById('toolboxNewProjectDiv').title = _texts[_globals.lang].titleNewProject;	
-	document.getElementById('toolboxNewProjectDiv').onclick = newProject;	
-	document.getElementById('toolboxNewProjectIcon').setAttribute('src',_icons.newProject);
+	_globals.newProjectDiv.title = _texts[_globals.lang].titleNewProject;	
+	_globals.newProjectDiv.onclick = newProject;	
+	_globals.newProjectIcon.setAttribute('src',_icons.newProject);
 
 	// Displaying links status (ON or OFF)
 	let displayLinks;
@@ -567,28 +547,6 @@ function displayHeaderAndFooterInfo() {
 		displayLinks = false;		
 	}
 	displayLinksStatus(displayLinks); 			// Initializing display/hide links tool
-}
-
-
-function calcPhaseCoords( rectStart, rectTop, rectWidth, rectHeight, brackets=0 ) {
-	let phaseBracketHeight = rectHeight * _settings.ganttRectBracketRelHeight;
-	let thick = (rectWidth+rectWidth > _settings.ganttRectBracketThick) ? _settings.ganttRectBracketThick : 1;
-	let rectEnd = rectStart + rectWidth;
-	let rectBottom = rectTop + rectHeight;
-	let phaseCoords;
-	if( brackets == 0 ) { // Both brackets
-		phaseCoords = rectStart+" "+rectTop+" "+rectEnd+" "+rectTop+" "+rectEnd+" "+rectBottom;
-		phaseCoords += " "+(rectEnd - thick)+" "+(rectBottom-phaseBracketHeight);
-		phaseCoords += " "+(rectStart + thick)+" "+(rectBottom-phaseBracketHeight)+" "+rectStart+" "+rectBottom;		
-	} else if( brackets == 1 ) {  // Only right bracket
-		phaseCoords = rectStart+" "+rectTop+" "+rectEnd+" "+rectTop+" "+rectEnd+" "+rectBottom;
-		phaseCoords += " "+(rectEnd - thick)+" "+(rectBottom-phaseBracketHeight);
-		phaseCoords += " "+rectStart+" "+(rectBottom-phaseBracketHeight);				
-	} else { // Only left bracket
-		phaseCoords = rectStart+" "+rectTop+" "+rectEnd+" "+rectTop+" "+rectEnd+" "+(rectBottom- phaseBracketHeight);
-		phaseCoords += " "+(rectStart + thick)+" "+(rectBottom-phaseBracketHeight)+" "+rectStart+" "+rectBottom;		
-	}
-	return phaseCoords;
 }
 
 
@@ -633,10 +591,10 @@ function newProject() {
     	if( namevalue ) {
 	    	if( namevalue.length == 2 ) {
 	    		let cname = trimString(namevalue[0]);
-		    		if( cname.length > 0 ) {
-		    		if( cname.indexOf('verticalSplitterPosition') == 0 ) { // Skipping vertical splitter position for it iss a browser setting only
-		    			continue;
-		    		}
+		    	if( cname.length > 0 ) {
+		    		//if( cname.indexOf('verticalSplitterPosition') == 0 ) { // Skipping vertical splitter position for it is a browser setting only
+		    		//	continue;
+		    		//}
 			    	deleteCookie( cname );	    			
 	    		}
 	    	}
@@ -646,70 +604,27 @@ function newProject() {
 }
 
 
-function resetCookies() {
-
-	deleteCookie('ganttVisibleTop');
-	deleteCookie('ganttVisibleHeight');
-
-	for( let cookie = 0 ; cookie < 100000 ; cookie++ ) {
-		let cname = _data.table[cookie].ref+"Position";
-		if( getCookie(cname) != null ) {
-			deleteCookie( cname );
-		} else {
-			break;
-		}
-	}
-	deleteCookie('ganttVisibleWidth'); 	// Saving new values in cookies...
-	deleteCookie('ganttVisibleLeft'); 		// 
-}
-
-
-function restoreExportedSettings(redraw=true) {
+function restoreExportedSettings() {
 	_globals.visibleTop = 0;
 	_globals.visibleHeight = _settings.readableNumberOfOperations;
 	setCookie('ganttVisibleTop', 0);
 	setCookie('ganttVisibleHeight', _settings.readableNumberOfOperations);
 
-	copyArrayOfObjects( _data.initialTable, _data.table );
 	for( let cookie = 0 ; cookie < _data.table.length ; cookie++ ) {
 		let cname = _data.table[cookie].ref+"Position";
 		if( getCookie(cname) != null ) {
 			deleteCookie( cname );
 		}
 		cname = _data.table[cookie].ref+"Width";
-		setCookie( cname, _data.table[cookie].width );
+		deleteCookie( cname );
 	}
-	if( redraw ) {
-		drawTableHeader(true);
-		drawTableContent(true);
-		drawTableScroll();
-		drawVerticalScroll();		
-	}
-	let gvw = _globals.secondsInPixel * _globals.ganttSVGWidth; 		// Calculating gantt width out of scale
-	if( gvw > 60*60 && !(gvw > _data.visibleMaxWidth) ) {
-		_globals.ganttVisibleWidth = gvw;
-	} else {
-		_globals.ganttVisibleWidth = _data.visibleMaxWidth;
-	}
-	_globals.ganttVisibleLeft = _data.visibleMin;
-	setCookie('ganttVisibleWidth', _globals.ganttVisibleWidth); 	// Saving new values in cookies...
-	setCookie('ganttVisibleLeft', _globals.ganttVisibleLeft); 		// 
-	if( redraw ) {
-		drawGantt();
-		drawTimeScale();
-		drawGanttHScroll();			
-	}
+	window.location.reload();
 }
 
 
 function onWindowLoad() {
 	initLayout();
 	loadData();
-}
-
-function onWindowResize(e) { 
-	initLayoutCoords(); 
-	displayData(); 
 }
 
 

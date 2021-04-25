@@ -5,6 +5,8 @@ export var _data = null;
 
 export var _globals = { 
 	lang: 'en',
+	projectId: null, uriDataChanged: null, dataChanged: null, dataSynchronized: -1, synchronizationRate: 10000,
+
 	htmlStyles: null, innerWidth: window.innerWidth, innerHeight: window.innerHeight,
 
 	redrawAllMode: false, touchDevice: false, dateDMY: true, dateDelim: '.', timeDelim: ':', 
@@ -70,10 +72,12 @@ export function initGlobals( appContainer, user ) {
 	if( _globals.touchDevice ) {	
 		document.documentElement.style.setProperty('--toolbox-table-height', '40px');
 	}
+	_globals.zoomHorizontallyDiv = document.getElementById('toolboxZoomHorizontallyDiv');
 	_globals.zoomHorizontallyInput = document.getElementById('toolboxZoomHorizontallyInput');
 	_globals.zoomHorizontallyIcon = document.getElementById('toolboxZoomHorizontallyIcon');
 	_globals.zoomHorizontallyMinusIcon = document.getElementById('toolboxZoomHorizontallyMinusIcon');
 	_globals.zoomHorizontallyPlusIcon = document.getElementById('toolboxZoomHorizontallyPlusIcon');
+	_globals.zoomVerticallyDiv = document.getElementById('toolboxZoomVerticallyDiv'); 
 	_globals.zoomVerticallyInput = document.getElementById('toolboxZoomVerticallyInput'); 
 	_globals.zoomVerticallyIcon = document.getElementById('toolboxZoomVerticallyIcon'); 
 	_globals.zoomVerticallyPlusIcon = document.getElementById('toolboxZoomVerticallyPlusIcon'); 
@@ -82,12 +86,20 @@ export function initGlobals( appContainer, user ) {
 	_globals.displayLinksIcon = document.getElementById('toolboxDisplayLinksIcon'); 
 	_globals.titlesPositioningDiv = document.getElementById('toolboxTitlesPositioningDiv'); 
 	_globals.titlesPositioningIcon = document.getElementById('toolboxTitlesPositioningIcon'); 
+	_globals.expandDiv = document.getElementById('toolboxExpandDiv');
 	_globals.expandInput = document.getElementById('toolboxExpandInput');
+	_globals.expandAllDiv = document.getElementById('toolboxExpandAllDiv');
 	_globals.expandAllIcon = document.getElementById('toolboxExpandAllIcon');
 	_globals.expandIcon = document.getElementById('toolboxExpandIcon');
 	_globals.expandPlusIcon = document.getElementById('toolboxExpandPlusIcon'); 
 	_globals.expandMinusIcon = document.getElementById('toolboxExpandMinusIcon'); 
-
+	_globals.resetTableDimensionsDiv = document.getElementById('toolboxResetTableDimensionsDiv');
+	_globals.resetTableDimensionsIcon = document.getElementById('toolboxResetTableDimensionsIcon');
+	_globals.zoom100Div = document.getElementById('toolboxZoom100Div');
+	_globals.zoom100Icon = document.getElementById('toolboxZoom100Icon');
+	_globals.zoomReadableDiv = document.getElementById('toolboxZoomReadableDiv');
+	_globals.zoomReadableIcon = document.getElementById('toolboxZoomReadableIcon');
+	
 	_globals.containerDiv = document.getElementById("containerDiv");
 	_globals.containerSVG = document.getElementById("containerSVG");
 	_globals.tableHeaderSVG = document.getElementById('tableHeaderSVG');
@@ -98,6 +110,9 @@ export function initGlobals( appContainer, user ) {
 	_globals.tableScrollSVG = document.getElementById("tableScrollSVG");
 	_globals.ganttHScrollSVG = document.getElementById("ganttScrollSVG");
 	_globals.verticalScrollSVG = document.getElementById("verticalScrollSVG");
+
+	_globals.newProjectDiv = document.getElementById("toolboxNewProjectDiv");
+	_globals.newProjectIcon = document.getElementById("toolboxNewProjectIcon");
 
 	let value = getCookie( "verticalSplitterPosition", 'float' );
 	if( value ) {
@@ -130,6 +145,22 @@ export function initGlobals( appContainer, user ) {
 	}
 	if( !user ) { user = 'NoName'; }
 	_globals.user = user;
+
+	let searchArray = window.location.search.split('&');
+	for( let i = 0 ; i < searchArray.length ; i++ ) {
+		let kv = searchArray[i].split('=');
+		if( i === 0 ) {
+			_globals.projectId = kv[1];
+		} else if( i === 1 ) {
+			try {
+				let dch = parseInt(kv[1]);
+				if( dch > 0 ) {
+					_globals.uriDataChanged = dch;
+				}
+			} catch(e) {;}	
+		} 
+	}
+	_globals.dataSynchronized = 1;
 }
 
 
@@ -163,6 +194,10 @@ export function setGlobal( key, value ) {
 }
 
 export function setData( data ) {
-	_data = data;
+	if( typeof(data) !== 'object' ) {
+		_data = {};
+	} else {
+		_data = data;
+	}
 }
 

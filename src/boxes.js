@@ -4,6 +4,7 @@ import { _texts } from './texts.js';
 import { formatTitleTextContent, getFormatForTableCellAndValue } from './helpers.js';
 import { dateIntoSpiderDateString, parseDate  } from './utils.js';
 import { calendar, calendarIsActive, calendarGetFormat, calendarSetFormat, calendarCancel } from './calendar.js';
+import { ifSynchronized } from './synchro.js';
 
 var	_blackOutBoxDiv=null;
 var	_messageBoxDiv=null;
@@ -196,45 +197,48 @@ export function displayEditBoxWithData( id ) {
 
 
 function onUserDataSave( xmlhttp, userData, savedFromEditBox = true ) {
-    if (xmlhttp.readyState == 4 ) {
-        if( xmlhttp.status == 200 ) {
-            let ok = false;
-            let responseObj = null;
-            try {
-                //console.log(xmlhttp.responseText);
-                responseObj = JSON.parse(xmlhttp.responseText);
-                if( responseObj !== null ) {
-                    if( 'errcode' in responseObj ) {
-                        if( responseObj.errcode === 0 ) {
-                            ok = true;
-                        }
-                    }
-                }
-            } catch (e) {;}
-            if( ok ) {
-                let i = (savedFromEditBox) ? _editBoxOperationIndex : _editFieldOperationIndex;
-                for( let iE = 0 ; iE < _data.editables.length ; iE++ ) { // For all editable fields in the table...
-                    let ref = _data.editables[iE].ref;
-                    if( ref in userData ) {
-                        _data.activities[i][ ref ] = userData[ref];
-                        writeValueIntoTable( i, _data.refSettings[ref].column, ref );
-                    }
-                }
-                if( savedFromEditBox ) { 
-                    hideEditBox();
-                } else {
-                    hideEditField();
-                }
-                document.getElementById('ganttGroupTitle'+i).textContent = formatTitleTextContent(i); 
-            } else {
-                if( savedFromEditBox ) {
-                    document.getElementById('editBoxMessage').innerText = _texts[_globals.lang].errorSavingData;
-                } else {
-                    alert("Error: " + xmlhttp.responseText); // this.responseText contains the error message. 
-                }
-            }
-        }
-    }
+	if (xmlhttp.readyState == 4 ) {
+		if( xmlhttp.status == 200 ) {
+			let ok = false;
+			let responseObj = null;
+			try {
+					//console.log(xmlhttp.responseText);
+					responseObj = JSON.parse(xmlhttp.responseText);
+					if( responseObj !== null ) {
+							if( 'errcode' in responseObj ) {
+									if( responseObj.errcode === 0 ) {
+											ok = true;
+									}
+							}
+					}
+			} catch (e) {;}
+			if( ok ) {
+				let i = (savedFromEditBox) ? _editBoxOperationIndex : _editFieldOperationIndex;
+				for( let iE = 0 ; iE < _data.editables.length ; iE++ ) { // For all editable fields in the table...
+					let ref = _data.editables[iE].ref;
+					if( ref in userData ) {
+							_data.activities[i][ ref ] = userData[ref];
+							writeValueIntoTable( i, _data.refSettings[ref].column, ref );
+					}
+				}
+				if( 'project' in responseObj && 'dataChanged' in responseObj.project ) {
+					ifSynchronized( false, responseObj.project.dataChanged );
+				}
+				if( savedFromEditBox ) { 
+						hideEditBox();
+				} else {
+						hideEditField();
+				}
+				document.getElementById('ganttGroupTitle'+i).textContent = formatTitleTextContent(i); 
+			} else {
+				if( savedFromEditBox ) {
+						document.getElementById('editBoxMessage').innerText = _texts[_globals.lang].errorSavingData;
+				} else {
+						alert("Error: " + xmlhttp.responseText); // this.responseText contains the error message. 
+				}
+			}
+		}
+	}
 }
 
 
@@ -249,11 +253,6 @@ function saveUserDataFromEditBox() {
 			setTimeout( function() { input.focus(); }, 0 ); 
 			return; // If invalid data found - nothing happens...
 		}
-	}
-
-	var xmlhttp = new XMLHttpRequest();
-	xmlhttp.onerror = function(e) { 
-		document.getElementById('editBoxMessage').innerText = _texts[_globals.lang].errorSavingData;
 	}
 
 	let bEdited = false; // The following is to confirm something has been edited...
@@ -275,25 +274,32 @@ function saveUserDataFromEditBox() {
 	} 
 	let data = createUserDataObjectToSendAfterEditing(_editBoxOperationIndex);
 	if( !data ) {
-        return;
-    }
+    return;
+  }
+
+	document.getElementById('editBoxMessage').innerText = _texts[_globals.lang].waitSaveUserDataText; // Displaying the "wait" message. 
+
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onerror = function(e) { 
+		document.getElementById('editBoxMessage').innerText = _texts[_globals.lang].errorSavingData;
+	}
+
 	xmlhttp.onreadystatechange = function(v) { 
 		if( xmlhttp.readyState == 4 ) {
 			if( xmlhttp.status == 200 ) { 
 				onUserDataSave( xmlhttp, data.data, true ); 
 				return;
 			}
+			document.getElementById('editBoxMessage').innerText = _texts[_globals.lang].errorSavingData;	
 		}
-		document.getElementById('editBoxMessage').innerText = _texts[_globals.lang].errorSavingData;	
 	};
 
-    xmlhttp.open("POST", _settings.urlSaveData, true);
-    xmlhttp.setRequestHeader("Cache-Control", "no-cache");
-    xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');		
-    //xmlhttp.setRequestHeader('Content-type', 'application/json');		
-    xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8"); //"application/x-www-form-urlencoded");
-    xmlhttp.send( data.json_data );		
-    document.getElementById('editBoxMessage').innerText = _texts[_globals.lang].waitSaveUserDataText; // Displaying the "wait" message. 
+	xmlhttp.open("POST", _settings.urlSaveData, true);
+	xmlhttp.setRequestHeader("Cache-Control", "no-cache");
+	xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');		
+	xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8"); // xmlhttp.setRequestHeader('Content-type', 'application/json');		
+	//console.log( data.json_data );
+	xmlhttp.send( data.json_data );
 }
 
 
@@ -508,36 +514,38 @@ function onEditFieldInputOk() {
 		return;
 	}	
 
-	var xmlhttp = new XMLHttpRequest();
+	let data = createUserDataObjectToSendAfterEditing( _editFieldOperationIndex, _editFieldRef );
+	if( !data ) {
+    return;
+  }
+
 	_editFieldMessage.style.display = 'block';
 	_editFieldMessage.innerText = _texts[_globals.lang].waitSaveUserDataText;
+
+	var xmlhttp = new XMLHttpRequest();
+
 	xmlhttp.onerror = function(e) { 
 		_editFieldMessage.innerText = _texts[_globals.lang].errorSavingData;
 		_editFieldMessage.style.display = 'block';
 	}
 
-	let data = createUserDataObjectToSendAfterEditing( _editFieldOperationIndex, _editFieldRef );
-	if( !data ) {
-        return;
-    }
-
-    xmlhttp.onreadystatechange = function(v) { 
+	xmlhttp.onreadystatechange = function(v) { 
 		if( xmlhttp.readyState == 4 ) {
 			if( xmlhttp.status == 200 ) { 
 				onUserDataSave( xmlhttp, data.data, false ); 
 				return;
-            }
-            _editFieldMessage.innerText = _texts[_globals.lang].errorSavingData;
-            _editFieldMessage.style.display = 'block';            
+			}
+			_editFieldMessage.innerText = _texts[_globals.lang].errorSavingData;
+			_editFieldMessage.style.display = 'block';            
 		}
-        _editFieldMessage.innerText = _texts[_globals.lang].waitSaveUserDataText;
-		_editFieldMessage.style.display = 'block';		
 	};
 
-    xmlhttp.open("POST", _settings.urlSaveData, true);
-    xmlhttp.setRequestHeader("Cache-Control", "no-cache");
-    xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');		
-    xmlhttp.send( data.json_data );		    
+	xmlhttp.open("POST", _settings.urlSaveData, true);
+	xmlhttp.setRequestHeader("Cache-Control", "no-cache");
+	xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');		
+	xmlhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8"); //"application/x-www-form-urlencoded");
+	//console.log( data.json_data );
+	xmlhttp.send( data.json_data );		    
 }
 
 
@@ -565,20 +573,20 @@ function createUserDataObjectToSendAfterEditing( i, editedFieldRef=null ) {
 		let ref = _data.editables[iE].ref;
 		let value = null; 
 		if( editedFieldRef === null ) { 	// Edited in box
-            let elem = document.getElementById( 'editBoxInput' + ref );
-            //console.log("BOX");
-            //console.log(elem.value);
+			let elem = document.getElementById( 'editBoxInput' + ref );
+			//console.log("BOX");
+			//console.log(elem.value);
 			value = elem.value;
 		} 
 		else { 		// Edited in field
-            console.log("ref=" + ref);
-            console.log("editedFieldRef=" + editedFieldRef);
-            if( ref == editedFieldRef ) { // The value just edited
-                //console.log("FIELD1");
-                //console.log(_editFieldInput.value);
-                value = _editFieldInput.value; 
+			//console.log("ref=" + ref);
+			//console.log("editedFieldRef=" + editedFieldRef);
+			if( ref == editedFieldRef ) { // The value just edited
+				//console.log("FIELD1");
+				//console.log(_editFieldInput.value);
+				value = _editFieldInput.value; 
 			} else { // A value of the same editedOperationIndex, yet not from edit field - thus not edited...
-                //console.log("FIELD2");
+				//console.log("FIELD2");
 				value = _data.activities[i][ ref ]; // ...simply copying that passed from 'SpiderProject'.							
 			}
 		}
@@ -593,13 +601,13 @@ function createUserDataObjectToSendAfterEditing( i, editedFieldRef=null ) {
     /*
 	let parentOperation='';
 	if( _data.activities[i].Level == 'A' ) { 	// It is an assignment - searching for parent
-		if( _data.activities[i].parents.length > 0 ) {
-			let parentIndex = _data.activities[i].parents[0];
+		if( _data.meta[i].parents.length > 0 ) {
+			let parentIndex = _data.meta[i].parents[0];
 			if( _data.activities[parentIndex].Level === null ) { 	// It is an operation
 				parentOperation = _data.activities[parentIndex].Code;
 			} else if( _data.activities[parentIndex].Level == 'T' ) { 	// It is a team
-				if( _data.activities[i].parents.length > 1 ) {
-					let parentOfParentIndex = _data.activities[i].parents[1];
+				if( _data.meta[i].parents.length > 1 ) {
+					let parentOfParentIndex = _data.meta[i].parents[1];
 					if( _dataOperations[parentOfParentIndex].Level === null ) { // It is an operation
 						parentOperation = _data.activities[parentOrParentIndex].Code;
 					}
@@ -607,25 +615,27 @@ function createUserDataObjectToSendAfterEditing( i, editedFieldRef=null ) {
 			}				
 		}
 	} else if( _data.activities[i].Level == 'T' ) { 	// It is a team - searching for parent
-		if( _data.activities[i].parents.length > 0 ) {
-			let parentIndex = _data.activities[i].parents[0];
+		if( _data.meta[i].parents.length > 0 ) {
+			let parentIndex = _data.meta[i].parents[0];
 			if( _data.activities[parentIndex].Level === null ) { 	// It is an operation
 				parentOperation = _data.activities[parentIndex].Code;
 			}
 		}
 	}
-    */
-   //console.log("data:");
-   //console.log(data);
+  */
+	//console.log("data:");
+	//console.log(data);
+	//console.log(_data.activities[i]);
 	return { 
-        json_data: JSON.stringify({
-            Code: _data.activities[i].Code,
-            Level: toString(_data.activities[i].Level),
-            project: (window.location.search.length > 0 ) ? window.location.search.substr(1) : '',
-            data: data
-        }),
-        data: data
-    };
+		json_data: JSON.stringify({
+				Code: _data.activities[i].Code,
+				Level: (typeof(_data.activities[i].Level) !== 'undefined' && _data.activities[i].Level !== null) ?
+					String(_data.activities[i].Level) : '',
+				fileName: _globals.projectId,
+				data: data
+		}),
+		data: data
+	};
 }
 
 
