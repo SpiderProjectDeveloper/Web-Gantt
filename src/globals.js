@@ -50,10 +50,18 @@ export var _globals = {
 	verticalScrollSVGSlider: null, verticalScrollSVGBkgr: null,
 	verticalScrollSVGWidth: null, verticalScrollSVGHeight: null,
 		
-    tableHeaderColumnSwapper: null, tableHeaderColumnSwapperCapturedAtX: -1, tableHeaderColumnSwapperOriginalX: -1,
+	tableHeaderColumnSwapper: null, tableHeaderColumnSwapperCapturedAtX: -1, tableHeaderColumnSwapperOriginalX: -1,
 
-    setVerticalSplitterWidthOp: -1, setVerticalScrollSVGThickOp: -1, 
-    setGanttHScrollSVGThickOp: -1, setTableScrollSVGThickOp: -1
+	setVerticalSplitterWidthOp: -1, setVerticalScrollSVGThickOp: -1, 
+	setGanttHScrollSVGThickOp: -1, setTableScrollSVGThickOp: -1,
+
+	chatServer: null, chatPort:8010, chatReadUrl:'.chat_read', chatInsertUrl:'.chat_write',
+	chatUpdateUrl:'.chat_update', chatRemoveUrl:'.chat_remove',
+	chatUpdateHTML:'&#9998;', chatSendUpdateHTML:'&#10004;', chatRemoveHTML:'&#10006;', chatCancelEditHTML:'&nwarhk;',
+	chatContainerElem: null, chatActivityTitleElem: null, chatSendMessageElem: null, 
+	chatSysMessageElem: null, chatMessageListElem:null, 
+	chatMessagesLimit: 25, chatMessagesNumber: 0, chatCheckForNewMessagesTimeout: 30000, 
+	chatIsFullyLoaded: null, chatMaxRowId:-1	
 };
 
 
@@ -137,7 +145,7 @@ export function initGlobals( appContainer, user ) {
 	let toolboxContent = document.getElementById('toolboxContent');
 	toolboxContent.style.width = Math.floor(4*_globals.innerWidth/5) + 'px';
 
-    if( user === null ) {
+  if( user === null ) {
 		let cookieUser = getCookie( 'user' );
 		if( cookieUser !== null ) {
 			user = cookieUser;
@@ -145,6 +153,11 @@ export function initGlobals( appContainer, user ) {
 	}
 	if( !user ) { user = 'NoName'; }
 	_globals.user = user;
+
+	let cookieSessId = getCookie( 'sess_id' ); 	// Reading the session id
+	if( cookieSessId !== null ) {
+		_globals.sessId = cookieSessId;
+	}
 
 	let searchArray = window.location.search.split('&');
 	for( let i = 0 ; i < searchArray.length ; i++ ) {
@@ -165,29 +178,28 @@ export function initGlobals( appContainer, user ) {
 
 
 export function initGlobalsWithDataParameters() {
-    if( 'parameters' in _data ) { 
-        if( typeof(_data.parameters.dateDelim) === 'string' ) 
-            _globals.dateDelim = _data.parameters.dateDelim;
-        if( typeof(_data.parameters.timeDelim) === 'string' )
-            _globals.timeDelim = _data.parameters.timeDelim;
-        if( typeof(_data.parameters.language) === 'string' )
-            _globals.lang = _data.parameters.language;
-        if( typeof(_data.parameters.secondsInPixel) === 'string' ) 
-            _globals.secondsInPixel = _data.parameters.secondsInPixel;
-        if( typeof(_data.parameters.expandToLevelAtStart) === 'string' ) 
-            _globals.expandToLevelAtStart = _data.parameters.expandToLevelAtStart;
-        if( typeof(_data.parameters.user) === 'string' ) 
-            _globals.user = _data.parameters.user;
+	if( 'parameters' in _data ) { 
+		if( typeof(_data.parameters.dateDelim) === 'string' ) 
+				_globals.dateDelim = _data.parameters.dateDelim;
+		if( typeof(_data.parameters.timeDelim) === 'string' )
+				_globals.timeDelim = _data.parameters.timeDelim;
+		if( typeof(_data.parameters.language) === 'string' )
+				_globals.lang = _data.parameters.language;
+		if( typeof(_data.parameters.secondsInPixel) === 'string' ) 
+				_globals.secondsInPixel = _data.parameters.secondsInPixel;
+		if( typeof(_data.parameters.expandToLevelAtStart) === 'string' ) 
+				_globals.expandToLevelAtStart = _data.parameters.expandToLevelAtStart;
+		if( typeof(_data.parameters.user) === 'string' ) 
+				_globals.user = _data.parameters.user;
 
-        let patternMDY = new RegExp( '([mM]+)([dD]+)([yY]+)' ); // Determining date format: DMY or MDY
-        if( patternMDY.test(_data.parameters.dateFormat) ) {               
-            _globals.dateDMY = false;
-        } else {
-            _globals.dateDMY = true;
-        }
-    } 
+		let patternMDY = new RegExp( '([mM]+)([dD]+)([yY]+)' ); // Determining date format: DMY or MDY
+		if( patternMDY.test(_data.parameters.dateFormat) ) {               
+				_globals.dateDMY = false;
+		} else {
+				_globals.dateDMY = true;
+		}
+	} 
 }
-
 
 export function setGlobal( key, value ) {
 	_globals[key] = value;
@@ -200,4 +212,3 @@ export function setData( data ) {
 		_data = data;
 	}
 }
-

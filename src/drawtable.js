@@ -7,6 +7,7 @@ import { onTableScrollSVGSliderTouchStart, onTableScrollSVGSliderTouchMove, onTa
 import { isEditable, operToScreen, setVisibleTopAndHeightAfterExpand, setNewColumnWidth,
     displayYZoomFactor, getFormatForTableCellAndValue } from './helpers.js';
 import { createRect, createSVG, createForeignObjectWithText, createCircle, createText, decColorToString  } from './utils.js';
+import { loadAndDisplayChat } from './chat';
 
 export function drawTableHeader( init=false, shiftOnly=false ) {
 	let thViewBox = `${_globals.tableViewBoxLeft} 0 ${_globals.tableHeaderSVGWidth} ${_globals.tableHeaderSVGHeight}`;
@@ -232,8 +233,8 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 
 		 	// Fields inside columns
 			for( let col = 1 ; col < _data.table.length ; col++ ) {
-                let ref = _data.table[col].ref;
-                let fmt = getFormatForTableCellAndValue( i, ref );
+				let ref = _data.table[col].ref;
+				let fmt = getFormatForTableCellAndValue( i, ref );
 				let content = fmt.value; // _data.activities[i][ref];
 				let fontStyle = fmt.fontStyle; // null;
 				let fontWeight = fmt.fontWeight; // null;
@@ -247,30 +248,32 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 				tableColumnSVG.appendChild( bkgr );
 
 				let textX = _settings.tableColumnTextMargin;
-				let textProperties = { id:('tableColumn'+col+'Row'+i), fill:color, textAnchor:'start', 
-					fontSize:fontSize, fontStyle:fontStyle, fontWeight:fontWeight, alignmentBaseline:'middle' };
-                if( _data.table[col].type === 'float' || _data.table[col].type === 'int' ) {
-                    textX = columnWidthToUse - _settings.tableColumnTextMargin*2;
-                    textProperties.textAnchor = 'end';
-                } else if( _data.table[col].type === 'string' || _data.table[col].type === 'text' ) { // For strings "format" stands for alignment
-                    if( _data.table[col].format == 1 ) { // Align right
-                        textX = columnWidthToUse - _settings.tableColumnTextMargin*2;
-                        textProperties.textAnchor = 'end';							
-                    } else if ( _data.table[col].format == 2 ) {
-                        textX = parseInt( (columnWidthToUse - _settings.tableColumnTextMargin) / 2 );
-                        textProperties.textAnchor = 'middle';														
-                    }
-                } else if( _data.table[col].type === 'signal' ) { // Signals require being 'centered'
-                    textX = parseInt( (columnWidthToUse - _settings.tableColumnTextMargin) / 2 );
-                    textProperties.fill = decColorToString( content, _settings.ganttNoSignalColor );
-                    if( Number(content) === _settings.ganttNoSignalColorNumber ) {
-                        circleR = 0.5;
-                        textProperties.stroke = _settings.ganttNoSignalColor;						
-                    } else {
-                        circleR = parseInt(3*fontSize/7);
-                        textProperties.stroke = _settings.tableContentStrokeColor;						
-                    }
-                }
+				let textProperties = { 
+					id:('tableColumn'+col+'Row'+i), fill:color, textAnchor:'start', 
+					fontSize:fontSize, fontStyle:fontStyle, fontWeight:fontWeight, alignmentBaseline:'middle' 
+				};
+				if( _data.table[col].type === 'float' || _data.table[col].type === 'int' ) {
+					textX = columnWidthToUse - _settings.tableColumnTextMargin*2;
+					textProperties.textAnchor = 'end';
+				} else if( _data.table[col].type === 'string' || _data.table[col].type === 'text' ) { // For strings "format" stands for alignment
+					if( _data.table[col].format == 1 ) { // Align right
+						textX = columnWidthToUse - _settings.tableColumnTextMargin*2;
+						textProperties.textAnchor = 'end';							
+					} else if ( _data.table[col].format == 2 ) {
+						textX = parseInt( (columnWidthToUse - _settings.tableColumnTextMargin) / 2 );
+						textProperties.textAnchor = 'middle';														
+					}
+				} else if( _data.table[col].type === 'signal' ) { // Signals require being 'centered'
+					textX = parseInt( (columnWidthToUse - _settings.tableColumnTextMargin) / 2 );
+					textProperties.fill = decColorToString( content, _settings.ganttNoSignalColor );
+					if( Number(content) === _settings.ganttNoSignalColorNumber ) {
+						circleR = 0.5;
+						textProperties.stroke = _settings.ganttNoSignalColor;						
+					} else {
+						circleR = parseInt(3*fontSize/7);
+						textProperties.stroke = _settings.tableContentStrokeColor;						
+					}
+				}
 				let text;
 				if( _data.table[col].type !== 'signal' ) {
 					text = createText( content, textX, lineMiddle, textProperties );
@@ -296,7 +299,14 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 					text.setAttributeNS( null, 'data-col', col );
 					text.setAttributeNS( null, 'data-type', editableType );
 					text.onmousedown = onTableFieldMouseDown;
-				} else {
+				} 
+				else if( ref === 'Name' && 'chatPort' in _globals && _globals.chatPort !== null ) {
+					bkgr.style.cursor = 'pointer';
+					bkgr.onmousedown = function(e) { loadAndDisplayChat( _data.activities[i]['Code'], _data.activities[i]['Name'] ); };
+					text.style.cursor = 'pointer';
+					text.onmousedown = function(e) { loadAndDisplayChat( _data.activities[i]['Code'], _data.activities[i]['Name'] ); };
+				}
+				else {
 					text.setAttribute('cursor','default');
 				}
 			}

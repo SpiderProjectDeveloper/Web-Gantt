@@ -175,7 +175,14 @@ export var _texts = {
 		titlesAboveTitle:'Click to display titles of operations and phases rightward',
 		titlesHiddenTitle:'The titles of operations and phases are hidden due to way too small size. Please zoom in to display the titles!',
 		titleNewProject:'Redisplay the page resetting it to the default settings. Also used when a new project has been uploaded',
-		menuGanttTitle:'Gantt', menuHelpTitle:'Help', menuPrintTitle:'Print', menuExitTitle:'Close Project', menuLogout:'Logout' },
+		menuGanttTitle:'Gantt', 
+		menuHelpTitle:'Help', 
+		menuPrintTitle:'Print', 
+		menuExitTitle:'Close Project', 
+		menuLogout:'Logout',
+		chatIsBeingLoadedMessage: 'Loading. Please wait...', 
+		chatErrorLoadingMessages: 'Error loading messages!' 
+	},
 	'ru': { operation:'Операция', phase:'Фаза', status:'Состояние', resourse:'Ресурс(ы)', version: 'Версия', uploadTime: 'Загружено',
 		expandColumn:'[]', Level:'Уровень', Name:'Название', Code:'Код', Start:'Старт', Fin:'Финиш', 
 		Notes:'Комментарий', status0:'Не начато', status100:'Завершено', statusNotFinished:'Не завершено',
@@ -223,5 +230,12 @@ export var _texts = {
 		titlesAboveTitle:'Нажмите, чтобы названия операций и фаз отображались справа',
 		titlesHiddenTitle:'Названия операций и фаз скрыты из-за слишком малого размера текста!',
 		titleNewProject:'Перегрузить страницу, сбросив все ее настройки отображения. Используйте также если на сервер загружен новый проект',
-		menuGanttTitle:'Гантт', menuHelpTitle:'Помощь', menuPrintTitle:'Печать', menuExitTitle:'Закрыть проект', menuLogout:'Выход' }
+		menuGanttTitle:'Гантт', 
+		menuHelpTitle:'Помощь', 
+		menuPrintTitle:'Печать', 
+		menuExitTitle:'Закрыть проект', 
+		menuLogout:'Выход',
+		chatIsBeingLoadedMessage: 'Загрузка. Пожалуйста ждите...', 
+		chatErrorLoadingMessages: 'Ошибка при загрузке сообщений!' 
+	}
 };
