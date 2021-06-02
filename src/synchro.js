@@ -3,6 +3,7 @@ import { _settings } from './settings.js';
 import { _globals, _data } from './globals.js';
 import { displayConfirmationBox } from './boxes.js';
 
+// Verifying the project has not been changed by another user
 export function ifSynchronized( scheduleNext = true, init = null ) {
 	if( init !== null ) {
 		_globals.dataChanged = init;
@@ -29,16 +30,12 @@ export function ifSynchronized( scheduleNext = true, init = null ) {
 						if( _globals.dataChanged === null ) {
 							_globals.dataChanged = props.project.dataChanged;
 							_globals.dataSynchronized = 1;
-						} else {
+						} else { 	// The project has been changed by another user
 							if( (typeof(props.project.dataChanged) === 'undefined') || props.project.dataChanged === _globals.dataChanged ) {
 								_globals.dataSynchronized = 1;
 							} else {
 								_globals.dataSynchronized = 0;
-								displayConfirmationBox( 
-									_texts[_globals.lang].unsynchronizedMessage, 
-									function() { 
-										window.location.reload();	
-									});
+								displayDataChangedConfirmationBox();
 							} 
 						}
 						if( scheduleNext && _globals.dataSynchronized === 1 ) {
@@ -81,4 +78,27 @@ export function displaySynchronizedStatus() {
 		icon.setAttribute('src',_icons.synchronized); // _globals.iconEmpty
 		container.title = _texts[_globals.lang].synchronizedMessage;
 	}
+}
+
+
+function displayDataChangedConfirmationBox( firstFailed = false ) {
+	let msg = _texts[_globals.lang].unsynchronizedMessage;
+	if( firstFailed ) {
+		msg += '<br/><br/><i>'+_texts[_globals.lang].serverDoesNotRespondMessage + '</i>'; 
+	}
+	displayConfirmationBox( msg, 
+		function() { 
+			let xhttpClose = new XMLHttpRequest(); 	// Send a "close project" message first
+			xhttpClose.onreadystatechange = function() {
+				if (xhttpClose.readyState == 4 ) {
+					if( xhttpClose.status == 200 ) { // When 
+						window.location.reload();	
+					} else {
+						displayDataChangedConfirmationBox(true);
+					}
+				}
+			}									
+			xhttpClose.open( 'GET', '/.close_project?'+_globals.projectId, true );
+			xhttpClose.send();
+		});
 }
