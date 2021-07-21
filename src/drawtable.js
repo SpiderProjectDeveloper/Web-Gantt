@@ -302,9 +302,15 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 				} 
 				else if( ref === 'Name' && 'chatPort' in _globals && _globals.chatPort !== null ) {
 					bkgr.style.cursor = 'pointer';
-					bkgr.onmousedown = function(e) { loadAndDisplayChat( _data.activities[i]['Code'], _data.activities[i]['Name'] ); };
+					let parent=null;
+					if( 'parents' in _data.meta[i] && _data.meta[i].parents.length > 0 ) {
+						let pindex = _data.meta[i].parents[0];
+						parent = _data.activities[pindex]['Code'];
+					}
+					let args = [ _data.activities[i]['Level'], _data.activities[i]['Code'], parent, _data.activities[i]['Name'] ];
+					bkgr.onmousedown = function(e) { loadAndDisplayChat( ...args ); };
 					text.style.cursor = 'pointer';
-					text.onmousedown = function(e) { loadAndDisplayChat( _data.activities[i]['Code'], _data.activities[i]['Name'] ); };
+					text.onmousedown = function(e) { loadAndDisplayChat( ...args ); };
 				}
 				else {
 					text.setAttribute('cursor','default');

@@ -55,7 +55,7 @@ export var _globals = {
 	setVerticalSplitterWidthOp: -1, setVerticalScrollSVGThickOp: -1, 
 	setGanttHScrollSVGThickOp: -1, setTableScrollSVGThickOp: -1,
 
-	chatServer: null, chatPort:8010, chatReadUrl:'.chat_read', chatInsertUrl:'.chat_write',
+	chatServer: null, chatPort:9000, chatReadUrl:'.chat_read', chatReadImageUrl: '.chat_read', chatInsertUrl:'.chat_write',
 	chatUpdateUrl:'.chat_update', chatRemoveUrl:'.chat_remove',
 	chatUpdateHTML:'&#9998;', chatSendUpdateHTML:'&#10004;', chatRemoveHTML:'&#10006;', chatCancelEditHTML:'&nwarhk;',
 	chatContainerElem: null, chatActivityTitleElem: null, chatSendMessageElem: null, 
@@ -191,6 +191,9 @@ export function initGlobalsWithDataParameters() {
 				_globals.expandToLevelAtStart = _data.parameters.expandToLevelAtStart;
 		if( typeof(_data.parameters.user) === 'string' ) 
 				_globals.user = _data.parameters.user;
+		if( 'chatPort' in _data.parameters && _data.parameters.chatPort ) {
+			_globals.chatPort = _data.parameters.chatPort;
+		}
 
 		let patternMDY = new RegExp( '([mM]+)([dD]+)([yY]+)' ); // Determining date format: DMY or MDY
 		if( patternMDY.test(_data.parameters.dateFormat) ) {               

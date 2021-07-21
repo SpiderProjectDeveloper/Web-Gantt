@@ -31,21 +31,21 @@ export var helpTextEn = "\
 	<br/><i>Desktop computers</i>:\
 	<span class='keyword'>shift+wheel</span>, \
 	with mouse cursor placed over the Gantt chart. Alternatively you may specify a required zoom factor in the \
-	<img src=\""+ _icons.zoomVertically + "\"/> input field at the bottom of the screen.\
+	<img src=\""+ _icons.zoomVertically + "\"/> input field in the Settings menu.\
 	<br/><i>Touch-screen devices</i>: Use <img src=\""+ _icons.zoomVerticallyPlus + "\"> / <img src=\"" + _icons.zoomVerticallyMinus + "\"> buttons.\
 	<div class='clearfix'></div></div>\
 	<div><b>Zoom in/out horizontally</b>: \
 	<br/><i>Desktop computers</i>:\
 	<span class='keyword'>shift+wheel</span> with mouse cursor placed over Time scale. \
 	Alternatively you may specify a required zoom factor in the \
-	<img src=\""+ _icons.zoomHorizontally + "\"/> input field at the bottom of the screen.\
+	<img src=\""+ _icons.zoomHorizontally + "\"/> input field in the Settings menu.\
 	<br/><i>Touch-screen devices</i>: Use <img src=\""+ _icons.zoomHorizontallyPlus + "\"> / <img src=\"" + _icons.zoomHorizontallyMinus +"\"> buttons.\
 	<div class='clearfix'></div></div>\
 	<div><b>Zoom to 100% horizontally</b>: Use <img src=\""+_icons.zoom100+"\"/> button.<div class='clearfix'></div></div>\
 	<div><b>Zoom to \"Readable\"</b>: Use <img src=\""+_icons.zoomReadable+"\"/> button.<div class='clearfix'></div></div>\
 	<div><b>Expand/Collapse to a Level</b>: \
 	<br/><i>Desktop computers</i>:\
-	Use <img src=\""+ _icons.expand + "\"/> input field at the bottom of the screen.\
+	Use <img src=\""+ _icons.expand + "\"/> input field in the Settings menu.\
 	<br/><i>Touch-screen devices</i>: Use <img src=\""+ _icons.expandPlus + "\"> / <img src=\"" + _icons.expandMinus +"\"> buttons.\
 	<div class='clearfix'></div></div>\
 	<div><b>Expand All Levels</b>: \
@@ -65,20 +65,7 @@ export var helpTextEn = "\
 	<div><b>Reset table settings (columns order and width)</b>: Use <img src=\""+_icons.exportSettings+"\"/> button \
 	to restore columns order and widths exported from Spider Project.<div class='clearfix'></div></div> \
 	<div><b>Edit a cell in the table</b>: Make a <span class='keyword'>left click</span> over a cell to display the <i>Edit</i> tool. \
-	<b>Please note</b> that data can be edited only if <i>Edit</i> mode <img src=\""+_icons.locked+"\"/> is on (see below).</div>\
-	<div><b>Edit a whole row of the table</b>: Make a <span class='keyword'>left click</span> over an operation or phase at the \
-	Gantt chart to open the <i>Edit</i> window. <b>Please note</b> that data can be edited only if \
-	<i>Edit</i> mode <img src=\""+ _icons.locked +"\"/> is on (see below).<div class='clearfix'></div></div>\
-	<div><b>Turn on/off <i>Edit</i> mode</b>: The <img src=\""+_icons.notLocked+"\"/> button displayed \
-	informs you that <i>Edit</i> mode is off and editing is disabled. \
-	Clicking this button replaces it with <img src=\""+_icons.notLocked+"\"/> and \
-	enables editing. Conversely the <img src=\""+_icons.locked+"\"/> button displayed informs you that <i>Edit</i> mode is on \
-	and editing is enabled. Clicking this button replaces it with <img src=\""+_icons.notLocked+"\"/> and disables editing. \
-	<b>Please note</b> that with <i>Edit</i> mode on <img src=\""+_icons.locked+"\"/> your data are locked against \
-	being changed or read by your local Spider Project application. After you finish editing you must \
-	turn <i>Edit</i> mode off, so that the data you've entered could be exported later into your local Spider Project application. \
-	The <img src=\""+_icons.notSynchronized+"\"> icon would be displayed to remind you that there are data entered but yet \
-	not exported.<div class='clearfix'></div></div>";
+	<div class='clearfix'></div></div>";
 
 export var helpTextRu = "\
 	<div><b>Увеличить/ Уменьшить вертикальный масштаб</b>: \
@@ -86,47 +73,40 @@ export var helpTextRu = "\
 	<span class='keyword'>shift+колесико мыши</span>, \
 	при этом курсор мыши должен находиться поверх диаграммы Гантта. Другой способ: поставить нужное значение в поле \
 	вертикального масштабирования <img src=\""+ _icons.zoomVertically + "\"/>, \
-	находящееся в правой нижней части экрана.\
+	находящееся в меню настроек.\
     <br/><i>ПК с сенсорным экраном</i>: Используйте кнопки <img src=\""+ _icons.zoomVerticallyPlus + "\"> / <img src=\"" + _icons.zoomVerticallyMinus + "\">.\
     <div class='clearfix' ></div></div>\
 	<div><b>Развернуть/свернуть до уровня</b>: \
 	<br/><i>Настольный ПК</i>:\
-	Используйте поле <img src=\""+ _icons.expand + "\"/> внизу экрана.\
+	Используйте поле <img src=\""+ _icons.expand + "\"/> в меню настроек.\
 	<br/><i>ПК с сенсорным экраном</i>: Используйте кнопки <img src=\""+ _icons.expandPlus + "\"> / <img src=\"" + _icons.expandMinus +"\">.\
 	<div class='clearfix'></div></div>\
 	<div><b>Развернуть все уровни</b>:\
-	Используйте кнопку <img src=\""+ _icons.expandAll + "\"/> внизу экрана.\
+	Используйте кнопку <img src=\""+ _icons.expandAll + "\"/> в меню настроек.\
 	<div class='clearfix'></div></div>\
 	<div><b>Увеличить/ Уменьшить горизонтальный масштаб</b>: \
 	<br/><i>Настольный ПК</i>:\
 	<span class='keyword'>shift+колесико мыши</span>, при этом курсор мыши должен находиться поверх шкалы времени. \
 	Другой способ: поставить нужное значение в поле горизонтального масштабирования <img src=\""+ _icons.zoomHorizontally + "\"/>, \
-	находящееся в правой нижней части экрана.\
+	находящееся в меню настроек.\
     <br/><i>ПК с сенсорным экраном</i>: Используйте кнопки <img src=\""+ _icons.zoomVerticallyPlus + "\"> / <img src=\"" + _icons.zoomVerticallyMinus +"\">.\
     <div class='clearfix' ></div></div>\
 	<div><b>\"Читаемый\" масштаб </b>: Иcпользуйте кнопку установки \"читаемого\" масштаба <img src=\""+_icons.zoomReadable+"\"/>, \
-	расположенную в нижней правой части страницы.<div class='clearfix'></div></div>\
+	расположенную в меню настроек.<div class='clearfix'></div></div>\
 	<div><b>Показать/спрятать связи</b>: используйте переключатель \
 	<img src=\""+_icons.displayLinks+"\"> / <img src=\""+_icons.notDisplayLinks+"\">, \
-	находящийся в нижней правой части страницы под диаграммой Гантта.<div class='clearfix'></div></div>\
+	находящийся в меню настроек.<div class='clearfix'></div></div>\
 	<div><b>Поменять порядок столбцов в таблице</b> (<i>не для сенсорных устройств</i>): \
     захватите с помощью мыши заголовок столбца и перемещайте его в нужное место.</div>\
 	<div><b>Изменить ширину столбца в таблице</b> (<i>не для сенсорных устройств</i>): \
     захватите с помощью мыши вертикальный разделитель между двумя столбцами и перемещайте его в нужное место.</div>\
 	<div><b>Сбросить настройки таблицы</b>: используйте кнопку восстановления настроек таблицы, экспортированных \
 	из Spider Project <img src=\""+_icons.exportSettings+"\"/>, расположенную в \
-	левой нижней части страницы.<div class='clearfix'></div></div> \
+	меню настроек.<div class='clearfix'></div></div> \
 	<div><b>Редактирование поля таблицы</b>: <span class='keyword'>шелчок</span> по операции или фазе \
 	на диаграмме Гантта (для <i>сенсорных устройств <span class='keyword'>касание</span></i>) открывает диалоговое окно,\
     где можно ввести данные; то же самое окно вызывается <span class='keyword'>щелчком/касанием</span> по \
-	редактируемому полю в самой таблице. <b>Внимание!</b> Данные можно править только при включенном <img src=\""+_icons.locked+"\"/> \
-	режиме редактирования (см. ниже).<div class='clearfix' ></div></div>\
-	<div><b>Включить/отключить режим редактирования</b>: используйте кнопку \
-	<img src=\""+_icons.locked+"\"/> (редактирование разрешено) / <img src=\""+_icons.notLocked+"\"/> (редактирование запрещено), \
-	расположенную в левой нижней части страницы. <b>Внимание!</b> Пока включен режим редактирования \
-	<img src=\""+_icons.locked+"\"/>, данные заблокированы от чтения/записи извне. Закончив правку данных \
-	отключите режим редактирования, (кнопка <img src=\""+_icons.locked+"\"/> заменится кнопкой <img src=\""+_icons.notLocked+"\"/>), \
-	чтобы введенные данные могли попасть в Spider Project.<div class='clearfix'></div></div>";
+	редактируемому полю в самой таблице.<div class='clearfix' ></div></div>";
 
 export var _texts = { 
 	'en': { operation:'Operation', phase:'Phase', status:'Status', resourse:'Resourse(s)', version: 'Version', uploadTime: 'Uploaded',
@@ -162,11 +142,6 @@ export var _texts = {
 		floatError:'Error: only floating point values are allowed (numbers and a decimal dot)!',
 		datetimeError:'Error: invalid datetime format!',
 		noConnectionWithServerMessage:'There is no connection with the server at the moment. You are unable to edit your data!',
-		dataLockedTitle:'Click to let the data you\'ve entered be exported into "Spider Project"',
-		dataNotLockedTitle:'Click to edit the data',		
-		dataNotLockedMessage:`You are not allowed to edit data until these are locked against being read/updated externally.` +
-			` After editing is finished you must unlock the data by clicking <img src='${_icons.locked}'  height=20/> ` +
-			` at the bottom corner of the page. Would you like to lock the data?`,
 		statusErrorMessage:'System error: editing is not allowed. Please contact your system administrator',
 		serverDataChangedMessage:'The data currently presented are obsolete. Please reload the page!',
 		waitWhileLockingMessage:'Please wait while preparing for data editing...',
@@ -181,7 +156,12 @@ export var _texts = {
 		menuExitTitle:'Close Project', 
 		menuLogout:'Logout',
 		chatIsBeingLoadedMessage: 'Loading. Please wait...', 
-		chatErrorLoadingMessages: 'Error loading messages!' 
+		chatErrorLoadingMessages: 'Error loading messages!',
+		chatMessageCanNotBeEmpty: 'A message can not be empty!',
+		chatSendMessageError: 'Error sending the message!',
+		chatCloseButton: 'Leave',
+		chatCancelButton: 'Cancel',
+		chatSendButton: 'Send'
 	},
 	'ru': { operation:'Операция', phase:'Фаза', status:'Состояние', resourse:'Ресурс(ы)', version: 'Версия', uploadTime: 'Загружено',
 		expandColumn:'[]', Level:'Уровень', Name:'Название', Code:'Код', Start:'Старт', Fin:'Финиш', 
@@ -216,12 +196,6 @@ export var _texts = {
 		floatError:'Ошибка: можно вводить только десятичные числа (цифры и десятчиную точку)!',
 		datetimeError:'Ошибка: недопустимый формат ввода даты!',
 		noConnectionWithServerMessage:'Связь с сервером сейчас отсутствует. К сожалению, вы не можете редактировать данные!',
-		dataLockedTitle:'Включен режим редактирования, и данные заблокированы от чтения/записи извне.' +
-			' Чтобы введенные вами данные попали в Spider Project нажмите сюда, отключив режим редактирования',
-		dataNotLockedTitle:'Режим редактирования выключен. Чтобы править данные, нажмите сюда, заблокировав их от чтения/записи извне.',
-		dataNotLockedMessage:`Чтобы править данные, нужно заблокировать их от чтения/записи извне.`+
-			` После того, как правка будет закончена, вы должны снять блокировку,`+
-			` нажав <img src='${_icons.locked}' height=20/> в нижнем левом углу страницы. Заблокировать данные?`,
 		statusErrorMessage:'Системная ошибка: правка данных невозможна. Обратитесь к системному администратору!',
 		serverDataChangedMessage:'Данные, которые вы сейчас видите, устарели. Пожалуйста, перегрузите страницу!',
 		waitWhileLockingMessage:'Пожалуйста, подождите пока данные будут готовы для правки...',
@@ -236,6 +210,11 @@ export var _texts = {
 		menuExitTitle:'Закрыть проект', 
 		menuLogout:'Выход',
 		chatIsBeingLoadedMessage: 'Загрузка. Пожалуйста ждите...', 
-		chatErrorLoadingMessages: 'Ошибка при загрузке сообщений!' 
+		chatErrorLoadingMessages: 'Ошибка при загрузке сообщений!',
+		chatMessageCanNotBeEmpty: 'Сообщение не может быть пустым!',
+		chatSendMessageError: 'Ошибка при отправке сообщения!',
+		chatCloseButton: 'Закрыть чат',
+		chatCancelButton: 'Отменить',
+		chatSendButton: 'Отправить'
 	}
 };

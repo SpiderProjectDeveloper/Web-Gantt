@@ -1,8 +1,6 @@
 import './index.css';
 import mainHTML from './main.html';
-import { drawTableHeader, drawTableContent, drawTableScroll, calcTableHeaderOverallWidth } from './drawtable.js';
-import { drawGantt, drawGanttHScroll, drawVerticalScroll } from './drawgantt.js';
-import { drawTimeScale } from './drawtimescale.js';
+import { calcTableHeaderOverallWidth } from './drawtable.js';
 import { displayMessageBox, hideMessageBox, createEditBoxInputs } from './boxes.js';
 import { _texts, _icons } from './texts.js';
 import { _settings } from './settings.js';
@@ -11,13 +9,13 @@ import { _globals, _data, setData, initGlobals, initGlobalsWithDataParameters } 
 import { onWindowMouseMove, onGanttWheel, onVerticalSplitterSVGMouseDown,  
 	onGanttMouseDown, onGanttCapturedMouseMove, onTimeWheel, onWindowMouseUp, onZoomHorizontallyIcon, 
 	onVerticalSplitterSVGTouchStart, onVerticalSplitterSVGTouchMove, onVerticalSplitterSVGTouchEnd,
-    onExpandMinusIcon, onExpandPlusIcon, onZoomHorizontallyPlusIcon, onZoomVerticallyIcon, 
-    onExpandIcon, onExpandBlur, onZoomHorizontallyBlur, onZoomVerticallyBlur } from './on.js'
+	onExpandMinusIcon, onExpandPlusIcon, onZoomHorizontallyPlusIcon, onZoomVerticallyIcon, 
+	onExpandIcon, onExpandBlur, onZoomHorizontallyBlur, onZoomVerticallyBlur } from './on.js'
 import { drawAll, calculateHorizontalZoomByVerticalZoom, displayLinksStatus, zoom100, zoomReadable,
-    initLayoutCoords, calcNotHiddenOperationsLength, displayXZoomFactor, displayYZoomFactor,  
+  initLayoutCoords, calcNotHiddenOperationsLength, displayXZoomFactor, displayYZoomFactor,  
 	expandToLevel, initDataHelpers } from './helpers.js';
-import { getCookie, setCookie, deleteCookie, createDefs, csvIntoJSON, dateIntoSpiderDateString, decColorToString, 
-	copyArrayOfObjects, trimString, filterInput, digitsOnly } from './utils.js';
+import { getCookie, setCookie, deleteCookie, createDefs, dateIntoSpiderDateString, decColorToString, 
+	trimString, filterInput, digitsOnly } from './utils.js';
 import { initMenu } from './menu.js';
 import { ifSynchronized } from './synchro.js';
 
@@ -332,7 +330,7 @@ function initData() {
 		}
 	}
 
-  initDataHelpers();
+	initDataHelpers();
 
 	readCustomSettings();
 
