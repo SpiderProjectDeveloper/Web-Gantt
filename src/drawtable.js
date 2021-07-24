@@ -172,64 +172,20 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 		let lineMiddle = lineBottom - lineHeight/2;
 
 		// Expand functionality [+] / [-]
-		let expand='';
-		if( _data.meta[i].expandable ) {
-			if( _data.meta[i].expanded ) {
-				expand='▼'; // ▼
- 			} else {
-				expand= '►'; // ▶				
-			}
-		}
 		let expandText;
-		let expandTextId = 'tableColumn0Row' + i;
+		let expandTextId = getExpandIconId(i);
 
-		if( init ) {	
-			expandText = createText( expand, _data.table[0].width/2.0, lineMiddle, 
-				{ id:expandTextId, fontSize:fontSize, textAnchor:'middle', alignmentBaseline:'baseline' } );
-	 		document.getElementById('tableColumnSVG0').appendChild(expandText);
-	 		expandText.dataset.operationNumber=i;
-	 		if( _data.meta[i].expandable ) {
-	 			expandText.style.cursor = 'pointer';
-		 		expandText.onmousedown = function(e) {
-		 			let operationNumber = Number(this.dataset.operationNumber); 
-		 			if( _data.meta[operationNumber].expanded == true ) {
-		 				for( let iO = 0 ; iO < _data.activities.length ; iO++ ) {
-		 					for( let iP = 0 ; iP < _data.meta[iO].parents.length ; iP++ ) {
-		 	 					if( _data.meta[iO].parents[iP] == operationNumber ) {
-			 						_data.meta[iO].visible = false;
-			 						break;
-			 					}
-			 				}
-			 			}
-		 				_data.meta[operationNumber].expanded = false;
-		 			} else {
-		 				for( let iO = operationNumber+1 ; iO < _data.activities.length ; iO++ ) {
-		 					for( let iP = 0 ; iP < _data.meta[iO].parents.length ; iP++ ) {
-		 						let iParent = _data.meta[iO].parents[iP];
-		 	 					if( iParent == operationNumber ) {
-			 						_data.meta[iO].visible = true;
-			 						break;
-			 					}
-			 					if( _data.meta[iParent].expandable && _data.meta[iParent].expanded == false ) {
-			 						break;
-			 					}
+		let chatIcon;
+		let chatIconId = getChatIconId(i);
 
-			 				}
-			 			}
-		 				_data.meta[operationNumber].expanded = true;
-		 			}
-					setVisibleTopAndHeightAfterExpand();
-		 			drawTableContent();
-					drawGantt(true);
-					displayYZoomFactor();
-					drawVerticalScroll();
-		 		};
-		 	}
-			if( fontSize >= _settings.tableMinFontSize ) { // If font size is too small to make text visible at screen.
-				expandText.setAttributeNS(null,'display','block');
-			} else {
-				expandText.setAttributeNS(null,'display','none');				
-			}
+		if( init ) {
+			chatIcon = createChatIcon(i, chatIconId, fontSize, lineTop);
+			if( chatIcon ) {
+				document.getElementById('tableColumnSVG0').appendChild(chatIcon);
+			}	
+
+			expandText = createExpandIcon( i, expandTextId, fontSize, lineTop );
+			document.getElementById('tableColumnSVG0').appendChild(expandText);
 
 		 	// Fields inside columns
 			for( let col = 1 ; col < _data.table.length ; col++ ) {
@@ -300,6 +256,7 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 					text.setAttributeNS( null, 'data-type', editableType );
 					text.onmousedown = onTableFieldMouseDown;
 				} 
+				/*
 				else if( ref === 'Name' && 'chatPort' in _globals && _globals.chatPort !== null ) {
 					bkgr.style.cursor = 'pointer';
 					let parent=null;
@@ -312,16 +269,27 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 					text.style.cursor = 'pointer';
 					text.onmousedown = function(e) { loadAndDisplayChat( ...args ); };
 				}
+				*/
 				else {
 					text.setAttribute('cursor','default');
 				}
 			}
 		} else {
+			if( chatIconId ) {
+				chatIcon = document.getElementById(chatIconId);
+				if( fontSize >= _settings.tableMinFontSize ) { // If font size is big enough to make text visible at screen.
+					chatIcon.setAttributeNS(null,'y', getChatIconY(lineTop));
+					chatIcon.style.fontSize = fontSize;
+					chatIcon.setAttributeNS(null,'display','block');				
+				} else {
+					chatIcon.setAttributeNS(null,'display','none');
+				}
+			}
 			expandText = document.getElementById(expandTextId);
 			if( fontSize >= _settings.tableMinFontSize ) { // If font size is big enough to make text visible at screen.
-				expandText.setAttributeNS(null,'x',_data.table[0].width/2.0);
-				expandText.setAttributeNS(null,'y',lineMiddle);
-				expandText.firstChild.nodeValue = expand;
+				expandText.setAttributeNS( null,'x', getExpandIconX(fontSize) );
+				expandText.setAttributeNS( null,'y', getExpandIconY(lineTop) );
+				expandText.firstChild.nodeValue = getExpandIconText(i);
 				expandText.style.fontSize = fontSize;
 				expandText.setAttributeNS(null,'display','block');				
 			} else {
@@ -528,3 +496,138 @@ export function onTableScrollSVGSliderMouseDown(e) {
 	_globals.tableScrollXAtCapture = this.getBBox().x;
 }
 
+
+function getChatIconId(i) {
+	return (_globals.chatPort ) ? ('tableColumn0RowChat' + i) : null;
+}
+
+
+function getChatIconX() {
+	return 1;
+}
+
+function getChatIconY(lineTop) {
+	return lineTop + 2;
+}
+
+function getChatIconColor(i) {
+	if( !_data.activities[i][_settings.numberOfMessagesInChatKey] ) {
+		return _settings.emptyChatColor;				 
+	} else {
+		if( !_data.activities[i][_settings.hasNewMessagesInChatKey] ) {
+			return _settings.notEmptyChatColor;				 
+		} else {
+			return _settings.newMessagesInChatColor;				 
+		}
+	} 
+}
+
+function createChatIcon( i, chatIconId, fontSize, lineTop ) {
+	if( !_globals.chatPort ) {
+		return null;
+	}
+	let chatMark = '✉'; // '☶'; // '☷'; // '🖃'; // '💬'; // '☰';
+	let chatMarkColor = getChatIconColor(i);
+	// let chatMarkTitle = '';
+	let chatIcon = createText( chatMark, getChatIconX(), getChatIconY(lineTop), 
+		{ id:chatIconId, fill:chatMarkColor, fontSize:fontSize, textAnchor:'start', alignmentBaseline:'hanging' } );
+
+	chatIcon.dataset.operationNumber=i;
+	chatIcon.style.cursor = 'pointer';
+	chatIcon.onmousedown = function(e) {
+		let parent=null;
+		if( 'parents' in _data.meta[i] && _data.meta[i].parents.length > 0 ) {
+			let pindex = _data.meta[i].parents[0];
+			parent = _data.activities[pindex]['Code'];
+		}
+		let opNum = Number(this.dataset.operationNumber); 
+		loadAndDisplayChat( _data.activities[opNum]['Level'], _data.activities[opNum]['Code'], parent, _data.activities[opNum]['Name'] );
+	}
+
+	if( fontSize >= _settings.tableMinFontSize ) { // If font size is too small to make text visible at screen.
+		chatIcon.setAttributeNS(null,'display','block');
+	} else {
+		chatIcon.setAttributeNS(null,'display','none');				
+	}
+
+	return chatIcon;
+}
+
+
+function getExpandIconId(i) {
+	return 'tableColumn0Row' + i;
+}
+
+function getExpandIconX( fontSize ) {
+	if( _globals.chatPort ) {
+		return fontSize + 1;
+	}	else {
+		return 1;
+	}
+}
+
+function getExpandIconY( lineTop ) {
+	return lineTop + 1;
+}
+
+function getExpandIconText(i) {
+	if( _data.meta[i].expandable ) {
+		if( _data.meta[i].expanded ) {
+			return '▼'; // ▼
+		 } else {
+			return '►'; // ▶				
+		}
+	}
+}
+
+function createExpandIcon( i, expandIconId, fontSize, lineTop ) {
+	let expandText = getExpandIconText(i);
+
+	let expandIcon = createText( expandText, getExpandIconX(fontSize), getExpandIconY(lineTop), 
+		{ id:expandIconId, fontSize:fontSize, textAnchor:'start', alignmentBaseline:'hanging' } );
+	expandIcon.dataset.operationNumber=i;
+	if( _data.meta[i].expandable ) {
+		expandIcon.style.cursor = 'pointer';
+		expandIcon.onmousedown = function(e) {
+			let operationNumber = Number(this.dataset.operationNumber); 
+			if( _data.meta[operationNumber].expanded == true ) {
+				for( let iO = 0 ; iO < _data.activities.length ; iO++ ) {
+					for( let iP = 0 ; iP < _data.meta[iO].parents.length ; iP++ ) {
+							if( _data.meta[iO].parents[iP] == operationNumber ) {
+							_data.meta[iO].visible = false;
+							break;
+						}
+					}
+				}
+				_data.meta[operationNumber].expanded = false;
+			} else {
+				for( let iO = operationNumber+1 ; iO < _data.activities.length ; iO++ ) {
+					for( let iP = 0 ; iP < _data.meta[iO].parents.length ; iP++ ) {
+						let iParent = _data.meta[iO].parents[iP];
+							if( iParent == operationNumber ) {
+							_data.meta[iO].visible = true;
+							break;
+						}
+						if( _data.meta[iParent].expandable && _data.meta[iParent].expanded == false ) {
+							break;
+						}
+
+					}
+				}
+				_data.meta[operationNumber].expanded = true;
+			}
+			setVisibleTopAndHeightAfterExpand();
+			drawTableContent();
+			drawGantt(true);
+			displayYZoomFactor();
+			drawVerticalScroll();
+		};
+	}
+	if( fontSize >= _settings.tableMinFontSize ) { // If font size is too small to make text visible at screen.
+		expandIcon.setAttributeNS(null,'display','block');
+	} else {
+		expandIcon.setAttributeNS(null,'display','none');				
+	}
+
+	return expandIcon;
+}

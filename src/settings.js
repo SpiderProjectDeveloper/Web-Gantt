@@ -29,5 +29,7 @@ export var _settings = {
 	zoomFactor:0.25, minXZoomFactor:0.5, minSecondsZoomed:43200, ganttVisibleWidthExtra:0.5, containerHPadding:0, 
 	webExportLineNumberColumnName:'f_WebExportLineNumber',
 	ganttSVGCursor:'zoom-in', ganttSVGCapturedCursor:'pointer', timeSVGCursor:'zoom-in',
-	readableNumberOfOperations:28, minNumberOfOperationsOnScreen:10, maxNumberOfOperationsOnScreen:50
+	readableNumberOfOperations:28, minNumberOfOperationsOnScreen:10, maxNumberOfOperationsOnScreen:50,
+	numberOfMessagesInChatKey:'f_MessagesNumber', hasNewMessagesInChatKey: 'f_MessagesNew',
+	emptyChatColor: '#cfcfcf', notEmptyChatColor: '#0f0f0f', newMessagesInChatColor: '#ff4444'
 };

@@ -4,7 +4,8 @@
     "timeDelim" : ":",
     "dateDelim" : ".",
     "dateFormat" : "",
-    "uploadTime" : 1612458837 
+    "uploadTime" : 1612458837,
+	"chatPort": 9000
   },
   "project" : {
     "Code" : "Building",
@@ -29,7 +30,9 @@
       "AsapStart" : 1484553600,
       "AsapFin" : 1508054400,
       "f_ColorCom" : "11534336",
-      "f_ColorBack" : "13233656" 
+      "f_ColorBack" : "13233656",
+      "f_MessagesNumber" : 2,
+	  "f_MessagesNew" : 1 
     },
     {
       "Level" : "2",
@@ -44,7 +47,8 @@
       "AsapStart" : 1484553600,
       "AsapFin" : 1491465600,
       "f_ColorCom" : "53760",
-      "f_ColorBack" : "13434828" 
+      "f_ColorBack" : "13434828" ,
+      "f_MessagesNumber" : 1
     },
     {
       "Level" : "3",
@@ -1977,7 +1981,25 @@
       "hidden" : 1,
       "format" : 0,
       "widthsym" : 17 
-    } 
+    },
+    {
+      "Code" : "f_MessagesNumber",
+      "Name" : "Сообщения в чате [количество]",
+      "Type" : "number",
+      "editable" : 0,
+      "hidden" : 1,
+      "format" : 0,
+      "widthsym" : 17 
+    },
+    {
+      "Code" : "f_MessagesNew",
+      "Name" : "Сообщения в чате [непрочитанные]",
+      "Type" : "number",
+      "editable" : 0,
+      "hidden" : 1,
+      "format" : 0,
+      "widthsym" : 17 
+    }  
   ],
   "links" : [
     {

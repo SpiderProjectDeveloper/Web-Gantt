@@ -55,7 +55,7 @@ export var _globals = {
 	setVerticalSplitterWidthOp: -1, setVerticalScrollSVGThickOp: -1, 
 	setGanttHScrollSVGThickOp: -1, setTableScrollSVGThickOp: -1,
 
-	chatServer: null, chatPort:9000, chatReadUrl:'.chat_read', chatReadImageUrl: '.chat_read', chatInsertUrl:'.chat_write',
+	chatServer: null, chatPort:null, chatReadUrl:'.chat_read', chatReadImageUrl: '.chat_read', chatInsertUrl:'.chat_write',
 	chatUpdateUrl:'.chat_update', chatRemoveUrl:'.chat_remove',
 	chatUpdateHTML:'&#9998;', chatSendUpdateHTML:'&#10004;', chatRemoveHTML:'&#10006;', chatCancelEditHTML:'&nwarhk;',
 	chatContainerElem: null, chatActivityTitleElem: null, chatSendMessageElem: null, 
