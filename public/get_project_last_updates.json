@@ -1,0 +1,33 @@
+﻿{
+  "parameters" : {
+    "language" : "ru",
+    "timeDelim" : ":",
+    "dateDelim" : ".",
+    "dateFormat" : "",
+    "uploadTime" : 1619105260 
+  },
+  "project" : {
+    "Code" : "01km_exp",
+    "Version" : "1",
+    "Name" : "1 км дороги",
+    "CurTime" : 1521187200,
+    "dataChanged" : 161909567
+  },
+  "activities": [ 
+    {
+      "Code": "01",
+      "Level": "3",
+      "parent": "0",
+      "f_MessagesNew": 0,
+      "f_MessagesNumber": 5
+	},
+    {
+      "Code": "01ew",
+      "parent": "01",
+      "f_MessagesNew": 1,
+      "f_MessagesNumber": 1
+	}
+  ],
+  "errcode" : 0,
+  "error" : "" 
+}

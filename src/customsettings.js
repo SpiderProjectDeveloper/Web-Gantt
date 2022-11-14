@@ -49,7 +49,6 @@ export function readCustomSettings() {
 	// Reading and validating top and height saved in cookies
 	let gvt = getCookie('ganttVisibleTop', 'float');
 	let gvh = getCookie('ganttVisibleHeight', 'float');
-	//if( gvh ) { console.log('GVH FOUND!!!!' + gvh);}
 	if( gvt || gvh ) {
 		if( !gvt ) { gvt = _globals.visibleTop; }
 		if( !gvh ) { gvh = _globals.visibleHeight; }
@@ -60,7 +59,7 @@ export function readCustomSettings() {
     // Initializing horizontal zoom
     let gvw = getCookie('ganttVisibleWidth', 'float'); 	// Reading gantt width from cookies
     if( !gvw && _globals.secondsInPixel !== -1 ) {
-        gvw = _globals.secondsInPixel * _globals.ganttSVGWidth; 		// Calculating gantt width out of scale
+			gvw = _globals.secondsInPixel * _globals.ganttSVGWidth; 		// Calculating gantt width out of scale
     }
     if( gvw > 60*60 && !(gvw >_data.visibleMaxWidth) ) {
         _globals.ganttVisibleWidth = gvw;

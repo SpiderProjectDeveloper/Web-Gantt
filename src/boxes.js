@@ -20,7 +20,8 @@ var	_editBoxDetailsElem=null;
 var _editBoxDateFieldCurrentlyBeingEdited=null;
 
 
-export function displayConfirmationBox( message, okFunction=null ) {
+export function displayConfirmationBox( message, okFunction=null ) 
+{
 	_blackOutBoxDiv = document.getElementById("blackOutBox");
 	_confirmationBoxDiv = document.getElementById("confirmationBox");
 	_confirmationBoxTextDiv = document.getElementById("confirmationBoxText");
@@ -41,13 +42,15 @@ export function displayConfirmationBox( message, okFunction=null ) {
 	}
 }
 
-export function hideConfirmationBox() {
+export function hideConfirmationBox() 
+{
 	_blackOutBoxDiv.style.display='none';	
 	_blackOutBoxDiv.onclick = null;
 	_confirmationBoxDiv.style.display = 'none';
 }
 
-export function displayMessageBox( message ) {
+export function displayMessageBox( message ) 
+{
 	_blackOutBoxDiv = document.getElementById("blackOutBox");
 	_messageBoxDiv = document.getElementById("messageBox");
 	_messageBoxTextDiv = document.getElementById("messageBoxText");
@@ -57,13 +60,15 @@ export function displayMessageBox( message ) {
 	_messageBoxTextDiv.innerHTML = message;
 }
 
-export function hideMessageBox() {
+export function hideMessageBox() 
+{
 	_blackOutBoxDiv.style.display='none';	
 	_messageBoxDiv.style.display = 'none';
 }
 
 
-function displayEditBox(focusElem=null) {
+function displayEditBox(focusElem=null) 
+{
 	_blackOutBoxDiv.style.display='block';	
 	_editBoxDiv.style.display = 'table';
 	if( focusElem ) { 
@@ -71,7 +76,8 @@ function displayEditBox(focusElem=null) {
 	}
 }
 
-function hideEditBox() {
+function hideEditBox() 
+{
 	_blackOutBoxDiv.style.display='none';	
 	_editBoxDiv.style.display = 'none';
 	document.getElementById('editBoxMessage').innerText = '';			
@@ -79,7 +85,8 @@ function hideEditBox() {
 }
 
 
-export function createEditBoxInputs() {
+export function createEditBoxInputs() 
+{
 	_blackOutBoxDiv = document.getElementById("blackOutBox");
 	_editBoxDiv = document.getElementById('editBox');			
 	_editBoxDetailsElem = document.getElementById('editBoxDetails');			
@@ -196,7 +203,8 @@ export function displayEditBoxWithData( id ) {
 }
 
 
-function onUserDataSave( xmlhttp, userData, savedFromEditBox = true ) {
+function onUserDataSave( xmlhttp, userData, savedFromEditBox = true ) 
+{
 	if (xmlhttp.readyState == 4 ) {
 		if( xmlhttp.status == 200 ) {
 			let ok = false;
@@ -234,7 +242,7 @@ function onUserDataSave( xmlhttp, userData, savedFromEditBox = true ) {
 				if( savedFromEditBox ) {
 						document.getElementById('editBoxMessage').innerText = _texts[_globals.lang].errorSavingData;
 				} else {
-						alert("Error: " + xmlhttp.responseText); // this.responseText contains the error message. 
+						alert( _texts[_globals.lang].errorSavingData ); // this.responseText contains the error message. 
 				}
 			}
 		}
@@ -242,7 +250,8 @@ function onUserDataSave( xmlhttp, userData, savedFromEditBox = true ) {
 }
 
 
-function saveUserDataFromEditBox() {
+function saveUserDataFromEditBox() 
+{
 	// Validating all the data are entered correctly...
 	for( let iE = 0 ; iE < _data.editables.length ; iE++ ) {
 		let ref = _data.editables[iE].ref;
@@ -303,7 +312,8 @@ function saveUserDataFromEditBox() {
 }
 
 
-function validateEditField( input, type, allowedEmpty=true ) {
+function validateEditField( input, type, allowedEmpty=true ) 
+{
 	let r = { ok:false, message:'ERROR!' };
 
 	let value = input.value;
@@ -329,18 +339,7 @@ function validateEditField( input, type, allowedEmpty=true ) {
     		r.message = _texts[_globals.lang].datetimeError;
 			return r;
 		}
-	} else if( type === 'int' ) {
-		let pattern = new RegExp("[^ 0-9]");
-    	let illegalCharacters = pattern.test(value);
-    	if( illegalCharacters ) { 
-    		r.message = _texts[_globals.lang].intError;    		
-    		return r;
-    	}		
-    	if( isNaN( parseInt(value) ) ) {
-    		r.message = _texts[_globals.lang].intError;    		
-    		return r;
-    	}
-	} else if( type === 'float' ) {
+	} else if( type === 'number' ) {
 		let pattern = new RegExp("[^ \\.0-9]");
     	let illegalCharacters = pattern.test(value);
     	if( illegalCharacters ) { 
@@ -368,7 +367,8 @@ var _editFieldCallCalendar = null;
 var _editFieldCancel = null;
 var _editFieldMessage = '';
 
-export function displayEditField( id ) {
+export function displayEditField( id ) 
+{
 	_blackOutBoxDiv.style.display='block';	
 
 	let i = id.getAttributeNS(null, 'data-i'); //var elements = document.querySelectorAll("[data-i='1'][data-col='1']");
@@ -434,7 +434,8 @@ export function displayEditField( id ) {
 	}
 }
 
-function setCalendarFormat( format ) {
+function setCalendarFormat( format ) 
+{
 	if( !( format > 0) ) { // For dates the "format" specifies if time required (1) or not (0) 
 		calendarSetFormat( {'dateOnly':true} );
 	} else {
@@ -442,7 +443,8 @@ function setCalendarFormat( format ) {
 	}			
 }
 
-function getCalendarFormat() {
+function getCalendarFormat() 
+{
 	let format = calendarGetFormat(); 
 	if( 'dateOnly' in format ) { 	// Should not happen, but...
 		return 1;
@@ -451,7 +453,8 @@ function getCalendarFormat() {
 }
 
 
-function callCalendarForEditField( input ) {
+function callCalendarForEditField( input ) 
+{
 	if( calendarIsActive() ) {
 		return;
 	}
@@ -462,7 +465,8 @@ function callCalendarForEditField( input ) {
 }
 
 
-function updateEditFieldWithCalendarChoice( d ) {
+function updateEditFieldWithCalendarChoice( d ) 
+{
 	if( d !== null ) {
 		let flag = ( !(_data.table[_editFieldCol].format > 0) ) ? true : false;
 		_editFieldInput.value = dateIntoSpiderDateString( d, flag );
@@ -473,7 +477,8 @@ function updateEditFieldWithCalendarChoice( d ) {
 }
 
 
-function onEditTableFieldKey(event) {
+function onEditTableFieldKey(event) 
+{
 	if( event.keyCode == 13 && !event.shiftKey ) { // && _editFieldType != 'text' ) {
 		event.preventDefault();
 		onEditFieldInputOk();
@@ -486,7 +491,8 @@ function onEditTableFieldKey(event) {
 }
 
 
-function onEditFieldInputOk() {
+function onEditFieldInputOk() 
+{
 	if( !_editFieldInput.value && !_editFieldOldValue ) { // Nothing has been changed...
 		hideEditField();
 		return;
@@ -549,7 +555,8 @@ function onEditFieldInputOk() {
 }
 
 
-function hideEditField() {
+function hideEditField() 
+{
 	calendarCancel();
 
 	_editFieldInput.removeEventListener( "keydown", onEditTableFieldKey );
@@ -565,7 +572,8 @@ function hideEditField() {
 } 
 
 
-function createUserDataObjectToSendAfterEditing( i, editedFieldRef=null ) {
+function createUserDataObjectToSendAfterEditing( i, editedFieldRef=null ) 
+{
 	let data = {};
 
     //userData[ 'Level' ] = _data.activities[i]['Level'];			
@@ -574,19 +582,12 @@ function createUserDataObjectToSendAfterEditing( i, editedFieldRef=null ) {
 		let value = null; 
 		if( editedFieldRef === null ) { 	// Edited in box
 			let elem = document.getElementById( 'editBoxInput' + ref );
-			//console.log("BOX");
-			//console.log(elem.value);
 			value = elem.value;
 		} 
 		else { 		// Edited in field
-			//console.log("ref=" + ref);
-			//console.log("editedFieldRef=" + editedFieldRef);
 			if( ref == editedFieldRef ) { // The value just edited
-				//console.log("FIELD1");
-				//console.log(_editFieldInput.value);
 				value = _editFieldInput.value; 
 			} else { // A value of the same editedOperationIndex, yet not from edit field - thus not edited...
-				//console.log("FIELD2");
 				value = _data.activities[i][ ref ]; // ...simply copying that passed from 'SpiderProject'.							
 			}
 		}
@@ -623,15 +624,12 @@ function createUserDataObjectToSendAfterEditing( i, editedFieldRef=null ) {
 		}
 	}
   */
-	//console.log("data:");
-	//console.log(data);
-	//console.log(_data.activities[i]);
 	return { 
 		json_data: JSON.stringify({
 				Code: _data.activities[i].Code,
 				Level: (typeof(_data.activities[i].Level) !== 'undefined' && _data.activities[i].Level !== null) ?
 					String(_data.activities[i].Level) : '',
-				fileName: _globals.projectId,
+				fileName: decodeURIComponent( _globals.projectId ),
 				data: data
 		}),
 		data: data
@@ -639,9 +637,9 @@ function createUserDataObjectToSendAfterEditing( i, editedFieldRef=null ) {
 }
 
 
-function writeValueIntoTable( i, col, ref, destElem=null ) {
-    let fmt = getFormatForTableCellAndValue( i, ref );
-    //console.log(fmt);
+function writeValueIntoTable( i, col, ref, destElem=null ) 
+{
+  let fmt = getFormatForTableCellAndValue( i, ref );
 	if( !destElem ) {
         destElem = document.getElementById( 'tableColumn'+col+'Row'+i );
     }    

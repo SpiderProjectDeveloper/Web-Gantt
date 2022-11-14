@@ -6,7 +6,7 @@
   --menu-width: calc( var(--header-height) * 2.25 );
 	--header-icon-height: calc( var(--header-height) * 0.55 );
 	--header-icon-bottom-margin: calc( var(--header-height) * 0.35 );
-	--toolbox-table-height:28px;
+	--toolbox-table-height:32px;
 	--toolbox-td-height:calc( var(--toolbox-table-height) - 2px );
 	--toolbox-font-size:calc( var(--toolbox-table-height) - 10px );
 	--toolbox-input-width:calc( var(--toolbox-table-height) + 20px );
@@ -28,7 +28,7 @@ div { margin:0; padding:0 }
 
 body { 
     background-color:white; scroll-behavior:smooth;
-    font-family:arial; margin:0; padding:0;
+    font-family:arial; margin:0; padding:0; overflow: hidden;
 }
 
 div { box-sizing: border-box; margin:0px; padding:0px; }
@@ -183,7 +183,7 @@ div#toolboxExpandDiv input {
 }
 div#toolboxSeparator { margin:0px 4px 0px 4px; }
 
-#toolboxZoomHorizontallyDiv, #toolboxZoomVerticallyDiv, #toolboxExpandDiv { 
+#toolboxZoomHorizontallyDiv, #toolboxZoomVerticallyDiv, #toolboxExpandDiv, #toolboxClipLeftDiv { 
     padding-right:0px; 
 } 
 #toolboxDisplayLinksDiv, #toolboxTitlesPositioningDiv, #toolboxExpandAllDiv {
@@ -192,7 +192,8 @@ div#toolboxSeparator { margin:0px 4px 0px 4px; }
 
 #toolboxZoomHorizontallyPlusIcon, #toolboxZoomHorizontallyMinusIcon, 
 #toolboxZoomVerticallyPlusIcon, #toolboxZoomVerticallyMinusIcon,
-#toolboxExpandPlusIcon, #toolboxExpandMinusIcon { 
+#toolboxExpandPlusIcon, #toolboxExpandMinusIcon,
+#toolboxClipLeftPlusIcon, #toolboxClipLeftMinusIcon { 
     margin-left:4px; margin-right:4px; 
 }
 
@@ -204,7 +205,6 @@ div#toolboxSeparator { margin:0px 4px 0px 4px; }
 	margin:0px 0px var(--header-icon-bottom-margin) 0px; padding:0px 2px 2px; border:none; 
 	background-color:rgba(255,255,255,0); color: #dfdfdf; cursor: help;
 }
-
 
 #pageContent {
     width:100%; top:var(--header-height);
@@ -398,4 +398,32 @@ svg { margin:0; padding:0; }
 
 .chat-file-attach-input {
 	display:inline-block; margin-top:8px;
+}
+
+.tablelinkmenu {
+	position: absolute;
+	background-color: #ffffff;
+	border-radius: 2px;
+	border: 1px solid #afafaf;
+	padding: 0px;
+	font-family: Arial;
+	display: block;
+}
+
+.tablelinkmenu-item {
+	box-sizing: border-box;
+	background-color:#ffffff;
+	color: #2f2f2f;
+	cursor: pointer;
+	margin: 0;
+	padding: 4px;
+}
+
+.tablelinkmenu-item:hover {
+	background-color:#dfdfdf;
+}
+
+.tablelinkmenu-item a {
+	text-decoration: none;
+	color: #2f2f2f;
 }

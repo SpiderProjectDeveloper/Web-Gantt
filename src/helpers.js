@@ -5,7 +5,8 @@ import { _settings } from './settings.js';
 import { _globals, _data } from './globals.js';
 import { _texts, _icons } from './texts.js';
 import { setCookie, createRect, dateIntoSpiderDateString, spacesToPadNameAccordingToHierarchy, 
-    getElementPosition, moveElementInsideArrayOfObjects, digitsOnly } from './utils.js';
+  getElementPosition, moveElementInsideArrayOfObjects, formatNumberStringForTable, 
+	digitsOnly } from './utils.js';
 
 export function drawAll() {
 	drawTableHeader(true);
@@ -210,13 +211,14 @@ export function getGanttMaxLeft() {
 }
 
 
-export function initDataHelpers() {
+export function initDataHelpers() 
+{
 	_data.table = [];
 	// Adding a column for expanding rows if required
 	if( _data.table.length === 0 ) {
-			_data.table.push({ 
-					ref:"expandColumn", name:"[]", type:null, widthsym:2, hidden:0, format:null, editable:false 
-			});
+		_data.table.push({ 
+			ref:"expandColumn", name:"[]", type:null, widthsym:4, hidden:0, format:null, editable:false 
+		});
 	}
 	for( let col = 0 ; col < _data.fields.length ; col++ ) {
 			if( 'hidden' in _data.fields[col] && _data.fields[col].hidden === 1 ) {
@@ -224,11 +226,18 @@ export function initDataHelpers() {
 			}
 			let editable = ('editable' in _data.fields[col] && _data.fields[col].editable===1);
 			let widthsym = ('widthsym' in _data.fields[col]) ? _data.fields[col].widthsym : null;
-			_data.table.push({
-					ref: _data.fields[col].Code, name:_data.fields[col].Name, 
-					type:_data.fields[col].Type, format: _data.fields[col].format,
-					editable: editable, widthsym: widthsym
-			});
+			let toPush = {
+				ref: _data.fields[col].Code, name:_data.fields[col].Name, 
+				type:_data.fields[col].Type, format: _data.fields[col].format,
+				editable: editable, widthsym: widthsym
+			};
+			if( 
+				('f_IsLink' in _data.fields[col] && _data.fields[col].f_IsLink == 1) ||
+				_data.fields[col].Code == 'Folder'
+			) { 
+				toPush.isLink = true;
+			}
+			_data.table.push( toPush );
 	}
 	// Creating editables for better data handling 
 	_data.editables = [];     
@@ -236,7 +245,7 @@ export function initDataHelpers() {
 			if( 'editable' in _data.table[col] && _data.table[col].editable ) {
 					_data.editables.push({ 
 							ref: _data.table[col].ref, name:_data.table[col].name, 
-							type:_data.table[col].type, format: _data.table[col].format 
+							type:_data.table[col].type, format: _data.table[col].format
 					});
 			}
 	}
@@ -244,7 +253,10 @@ export function initDataHelpers() {
 	// Creating refSettings for better data handling
 	_data.refSettings = {}; 
 	for( let col = 0 ; col < _data.table.length ; col++ ) {
-			let o = { column: col, type: _data.table[col].type, format: _data.table[col].format, name: _data.table[col].name, editableType: null };
+			let o = { 
+				column: col, type: _data.table[col].type, format: _data.table[col].format, 
+				name: _data.table[col].name, isLink: _data.table[col].isLink, editableType: null 
+			};
 			for( let ie = 0 ; ie < _data.editables.length ; ie++ ) { 	// Is editable?
 					if( _data.editables[ie].ref === _data.table[col].ref ) {
 							o.editableType = _data.editables[ie].type;
@@ -257,8 +269,20 @@ export function initDataHelpers() {
 	for( let col = 0 ; col < _data.table.length ; col++ ) { // Recalculating widths in symbols into widths in points 
     let add = _settings.tableColumnHMargin*2 + _settings.tableColumnTextMargin*2;
     let isWid = ('widthsym' in _data.table[col] && _data.table[col].widthsym !== null );
-		_data.table[col].width = (isWid) ? (_data.table[col].widthsym * _settings.tableMaxFontSize*0.5 + add) : 5;
+		_data.table[col].width = (isWid) ? (_data.table[col].widthsym * _settings.tableMaxFontSize*0.5 + add) : add+5;
 	}
+}
+
+export function createCodeLevelParentKey( dataItem, parent0Code=undefined ) {
+	let code = dataItem['Code'];
+	let level = ('Level' in dataItem && dataItem['Level'] !== null) ? dataItem['Level'] : 'nolevel';
+	let parent;
+	if( parent0Code === undefined ) { 	// Parent is specified in the dataITem 
+		parent = ('parent' in dataItem && dataItem['parent'] !== null) ? dataItem['parent'] : 'noparent';
+	} else {
+		parent = ( parent0Code === null ) ? 'noparent' : parent0Code;
+	} 
+	return code + '_' + level + '_' + parent;
 }
 
 
@@ -534,24 +558,26 @@ export function operToScreen( n ) {
 
 
 
-export function calculateHorizontalZoomByVerticalZoom( top, height ) {
+export function calculateHorizontalZoomByVerticalZoom( top, height ) 
+{
 	let th = validateTopAndHeight( top, height );
 	let newVisibleHeight = th[1]; // (_globals.notHiddenOperationsLength < height) ? _globals.notHiddenOperationsLength : height;
-	let newVisibleTop = th[0]; (top + newVisibleHeight) <= _globals.notHiddenOperationsLength ? top : (_globals.notHiddenOperationsLength - newVisibleHeight);
+	let newVisibleTop = th[0]; // (top + newVisibleHeight) <= _globals.notHiddenOperationsLength ? top : (_globals.notHiddenOperationsLength - newVisibleHeight);
 	
 	let newVisibleLeft, newVisibleWidth;
 	if( _globals.notHiddenOperationsLength > height ) {		
-		let min = _data.activities[0].displayStartInSeconds;
-		let max = _data.activities[0].displayFinInSeconds;
-		for( let i = 1 ; i < newVisibleHeight ; i++ ) {
+		let min = Number.MAX_VALUE;
+		let max = Number.MIN_VALUE;
+		for( let i = 0 ; i < newVisibleHeight ; i++ ) {
 			let d = _data.activities[i];
+			if( _data.activities[i].displayStartInSeconds === null ) continue; // If no dates are set at all...
+// NEW!! (edited)
 			if( d.displayStartInSeconds < min ) {
-				min = d.displayStartInSeconds;
+				min = (d.displayStartInSeconds < _data.visibleMin ) ? _data.visibleMin : d.displayStartInSeconds;
 			} 
 			if( d.displayFinInSeconds > max ) {
-				max = d.displayFinInSeconds;
+				max = (d.displayFinInSeconds > _data.visibleMax) ? _data.visibleMax : d.displayFinInSeconds;
 			}
-
 		}
 		newVisibleLeft = min;
 		newVisibleWidth = max - min;
@@ -811,9 +837,9 @@ export function expandToLevel( level=null, redraw=false ) {
 
 
 export function getFormatForTableCellAndValue( i, ref ) {
-    let r = { value: '', fontStyle: 'normal', fontWeight: 'normal' };
+  let r = { value: '', fontStyle: 'normal', fontWeight: 'normal' };
 
-    if( typeof(_data.activities[i][ref]) === 'undefined' || _data.activities[i][ref] === null || _data.activities[i][ref] === '' ) {
+  if( typeof(_data.activities[i][ref]) === 'undefined' || _data.activities[i][ref] === null || _data.activities[i][ref] === '' ) {
 		return r;
 	} 
 	r.value = _data.activities[i][ref];
@@ -831,24 +857,26 @@ export function getFormatForTableCellAndValue( i, ref ) {
 
 	if( ref == 'Name') {
 		let hrh = _data.meta[i].parents.length;
-        r.value = spacesToPadNameAccordingToHierarchy(hrh) + r.value;
-        if( typeof(_data.activities[i].Level) === 'number' ) { // If it is a phase...
-            r.fontWeight = 'bold'; // ... making it bold.
-        }
-    } else { 
-        if( _data.refSettings[ref].type === 'float' || _data.refSettings[ref].type === 'int' ) {
-            r.value = formatNumberStringForTable( r.value, _data.refSettings[ref].type, _data.refSettings[ref].format );
-        } else if( _data.refSettings[ref].type === 'datetime' ) {
-            r.value = dateIntoSpiderDateString( r.value, (_data.refSettings[ref].format === 0) );
-        }
-    }    
-    if( typeof(r.value) === 'undefined' ) {
-        r.value = '';
-    } else if( r.value === null ) {
-        r.value = '';
-    }
-
-    return r;
+		r.value = spacesToPadNameAccordingToHierarchy(hrh) + r.value;
+		if( typeof(_data.activities[i].Level) === 'number' ) { // If it is a phase...
+				r.fontWeight = 'bold'; // ... making it bold.
+		}
+  } else { 
+		if( _data.refSettings[ref].type === 'number' ) {
+			r.value = formatNumberStringForTable( r.value, _data.refSettings[ref].format );
+		} else if( _data.refSettings[ref].type === 'datetime' ) {
+			r.value = dateIntoSpiderDateString( r.value, (_data.refSettings[ref].format === 0) );
+		}
+  }
+	if( _data.refSettings[ref].isLink && r.value ) {
+		; // r.value = `<a href='${r.value}' target=_blank>${r.value}</a>`;
+	}    
+	if( typeof(r.value) === 'undefined' ) {
+			r.value = '';
+	} else if( r.value === null ) {
+			r.value = '';
+	}
+  return r;
 }
 
 export function moveColumnOfTable( from, to ) {

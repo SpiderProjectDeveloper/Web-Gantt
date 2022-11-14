@@ -1,0 +1,70 @@
+﻿<style>
+.tablelinkmenu {
+	position: absolute;
+	background-color: #ffffff;
+	border-radius: 2px;
+	border: 1px solid #afafaf;
+	padding: 0px;
+	font-family: Arial;
+	display: none;
+}
+
+.tablelinkmenu-item {
+	box-sizing: border-box;
+	background-color:#ffffff;
+	color: #2f2f2f;
+	cursor: pointer;
+	margin: 0;
+	padding: 4px;
+}
+
+.tablelinkmenu-item:hover {
+	background-color:#dfdfdf;
+}
+
+.tablelinkmenu-item a {
+	text-decoration: none;
+}
+</style>
+
+
+<body>
+	
+<div id='menu' class="tablelinkmenu">
+</div>
+
+<div id='trigger'>OPEN</div>
+</body>
+
+<script>
+
+let trigger = document.getElementById('trigger');
+trigger.addEventListener('mousedown', (e) => {
+	displayTableLinkMenu(e, [ 
+		{ text:'aaaa', href: 'http://www.spiderproject.ru' }, 
+		{ text:'bbbb', href: 'http://www.spiderproject.ru' } 
+	]);
+});
+
+let menu = document.getElementById('menu');
+menu.addEventListener('mouseleave', (e) => {
+		menu.style.display = 'none';
+		while(menu.firstChild) {
+			menu.removeChild(menu.firstChild);
+		}
+});
+
+function displayTableLinkMenu(e, items) {	
+	menu.style.left = e.clientX-10;
+	menu.style.top = e.clientY-10;
+	menu.style.display = 'block';
+
+	for( let i of items ) {
+		let div = document.createElement('div');
+		div.className = 'tablelinkmenu-item';
+		div.innerHTML = `<a href='${i.href}' target=_blank>${i.text}</a>`;
+		menu.appendChild(div);
+	}
+}
+
+</script>

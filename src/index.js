@@ -10,10 +10,12 @@ import { onWindowMouseMove, onGanttWheel, onVerticalSplitterSVGMouseDown,
 	onGanttMouseDown, onGanttCapturedMouseMove, onTimeWheel, onWindowMouseUp, onZoomHorizontallyIcon, 
 	onVerticalSplitterSVGTouchStart, onVerticalSplitterSVGTouchMove, onVerticalSplitterSVGTouchEnd,
 	onExpandMinusIcon, onExpandPlusIcon, onZoomHorizontallyPlusIcon, onZoomVerticallyIcon, 
-	onExpandIcon, onExpandBlur, onZoomHorizontallyBlur, onZoomVerticallyBlur } from './on.js'
+	onExpandIcon, onExpandBlur, onZoomHorizontallyBlur, onZoomVerticallyBlur, 
+	onClipLeftBlur, onClipLeftIcon // NEW!! 
+} from './on.js'
 import { drawAll, calculateHorizontalZoomByVerticalZoom, displayLinksStatus, zoom100, zoomReadable,
   initLayoutCoords, calcNotHiddenOperationsLength, displayXZoomFactor, displayYZoomFactor,  
-	expandToLevel, initDataHelpers } from './helpers.js';
+	expandToLevel, initDataHelpers, createCodeLevelParentKey } from './helpers.js';
 import { getCookie, setCookie, deleteCookie, createDefs, dateIntoSpiderDateString, decColorToString, 
 	trimString, filterInput, digitsOnly } from './utils.js';
 import { initMenu } from './menu.js';
@@ -65,28 +67,37 @@ if( !_globals.touchDevice ) {
 	window.addEventListener( 'touchmove', function(e) { e.preventDefault(); } );
 }
 
-function loadData() {
-	if( document.location.host ) {
+function loadData() 
+{
+	if( document.location.host ) 
+	{
 		var xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function() {
-		    if ( this.readyState == 4 ) { 
-		    	if( this.status == 200 ) {
-			    	let errorParsingData = false;
-			    	try {
-				      setData( JSON.parse(this.responseText) ); // TO UNCOMMENT!!!!
-			    	} catch(e) {
-			    		console.log('Error: ' + e.name + ":" + e.message + "\n" + e.stack + "\n" + e.cause);
-			    		errorParsingData = true;
-			    	}
-			    	if( errorParsingData ) { // To ensure data are parsed ok... // alert(this.responseText);
+		xmlhttp.onreadystatechange = function() 
+		{
+		  if ( this.readyState == 4 ) 
+			{ 
+				if( this.status == 200 ) 
+				{
+					let errorParsingData = false;
+					try {
+						setData( JSON.parse(this.responseText) ); // TO UNCOMMENT!!!!
+					} catch(e) {
+						//console.log('Error: ' + e.name + ":" + e.message + "\n" + e.stack + "\n" + e.cause);
+						errorParsingData = true;
+					}
+					if( errorParsingData ) { // To ensure data are parsed ok... // alert(this.responseText);
 						displayMessageBox( _texts[_globals.lang].errorParsingData ); 
 						return;
-			    }
-					// if( 'ontouchstart' in document.documentElement ) { // To find out is it a touch device or not...
-					//	_globals.touchDevice = true;
-					// }
+					}
+					// if( 'ontouchstart' in document.documentElement ) globals.touchDevice = true;
+
 					hideMessageBox();
 					initGlobalsWithDataParameters();
+
+					if( ('errcode' in _data) && _data.errcode != 0 ) {	
+						displayMessageBox( _texts[_globals.lang].loginError ); 
+						return;
+					}
 
 					if( !('activities' in _data) || _data.activities.length == 0 ) {
 						displayMessageBox( _texts[_globals.lang].errorParsingData ); 
@@ -94,10 +105,10 @@ function loadData() {
 					}
 					if( initData() == 0 ) {
 						if( !('editables' in _data) || _data.editables.length == 0 ) {
-								_data.noEditables = true;
+							_data.noEditables = true;
 						} else {
-								_data.noEditables = false;
-								createEditBoxInputs();
+							_data.noEditables = false;
+							createEditBoxInputs();
 						}		
 						displayData();
 						ifSynchronized();
@@ -123,7 +134,8 @@ function displayData() {
 }
 
 
-function initData() {
+function initData() 
+{
 	_data.project.curTimeInSeconds = _data.project.CurTime;
 	_data.project.CurTime = dateIntoSpiderDateString( _data.project.CurTime );
 	if( _data.activities.length == 0 ) {
@@ -216,23 +228,30 @@ function initData() {
 			d.displayStartInSeconds = d.FactStartInSeconds; 
 			d.displayFinInSeconds = d.FactFinInSeconds;
 			d.displayRestartInSeconds = null; 
-		} else {
-			if( !d.FactStart ) { // Has not been started yet
-				d.status = 0; // not started 
-				d.displayStartInSeconds = d.AsapStartInSeconds; 
-				d.displayFinInSeconds = d.AsapFinInSeconds;
-				d.displayRestartInSeconds = null;
-			} else { // started but not finished
-				let divisor = (d.AsapFinInSeconds - d.AsapStartInSeconds) + (d.lastFinInSeconds - d.FactStartInSeconds); 
-				if( divisor > 0 ) {
-					d.status = parseInt( (d.lastFinInSeconds - d.FactStartInSeconds) * 100.0 / divisor - 1.0); 
-				} else {
-					d.status = 50;
-				}
-				d.displayStartInSeconds = d.FactStartInSeconds; 
-				d.displayFinInSeconds = d.AsapFinInSeconds;
-				d.displayRestartInSeconds = d.AsapStartInSeconds;
+		} else if( 
+			(d.FactStartInSeconds === -1 && d.AsapStartInSeconds === -1) || 
+			(d.FactFinInSeconds === -1 && d.AsapFinInSeconds === -1) 
+		)
+		{
+			d.displayStartInSeconds = null; 
+			d.displayFinInSeconds = null;
+			d.displayRestartInSeconds = null;
+		} 
+		else if( !d.FactStart ) { // Has not been started yet
+			d.status = 0; // not started 
+			d.displayStartInSeconds = d.AsapStartInSeconds; 
+			d.displayFinInSeconds = d.AsapFinInSeconds;
+			d.displayRestartInSeconds = null;
+		} else { // started but not finished
+			let divisor = (d.AsapFinInSeconds - d.AsapStartInSeconds) + (d.lastFinInSeconds - d.FactStartInSeconds); 
+			if( divisor > 0 ) {
+				d.status = parseInt( (d.lastFinInSeconds - d.FactStartInSeconds) * 100.0 / divisor - 1.0); 
+			} else {
+				d.status = 50;
 			}
+			d.displayStartInSeconds = d.FactStartInSeconds; 
+			d.displayFinInSeconds = d.AsapFinInSeconds;
+			d.displayRestartInSeconds = d.AsapStartInSeconds;
 		}
 		_data.meta[i].color = decColorToString( d.f_ColorCom, _settings.ganttOperation0Color );
 		//d.color = decColorToString( d.f_ColorCom, _settings.ganttOperation0Color );
@@ -290,11 +309,14 @@ function initData() {
 		_data.meta[i].visible = true;
 	}
 
-	// Searching for the deepest level... 
+	// Searching for the deepest level and creating 'code-level-parent' keys... 
+	_data.codeLevelParentMap = {};
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
 		if( _data.meta[i].parents.length >= _globals.maxExpandableLevel ) {
 			_globals.maxExpandableLevel =  _data.meta[i].parents.length + 1;
 		}
+		let k = createCodeLevelParentKey( _data.activities[i], _data.meta[i].parent0Code );
+		_data.codeLevelParentMap[k] = i;	
 	}
 	_globals.expandInput.value = _globals.maxExpandableLevel; 	// To init the input, that allows futher changing expand level
 
@@ -341,7 +363,7 @@ function initData() {
 	_globals.visibleTop = newZoom[0];
 	_globals.visibleHeight = newZoom[1];
 	_globals.ganttVisibleLeft = newZoom[2];
-	_globals.ganttVisibleWidth = newZoom[3];    
+	_globals.ganttVisibleWidth = newZoom[3];  
 
 	displayYZoomFactor();
 	displayXZoomFactor();
@@ -382,7 +404,12 @@ function initParents( iOperation ) {
 				}
 			}
 		}
-	}	
+	}
+	if(_data.meta[iOperation].parents.length > 0) {
+		_data.meta[iOperation].parent0Code = _data.activities[ _data.meta[iOperation].parents[0] ].Code;
+	}	else {
+		_data.meta[iOperation].parent0Code = null;
+	}
 }
 
 
@@ -433,7 +460,8 @@ function initLayout() {
 	}
 
 	// controls
-	if( !_globals.touchDevice ) {
+	if( !_globals.touchDevice ) 
+	{
 		_globals.zoomHorizontallyInput.addEventListener('input', function() { filterInput(this); } );
 		_globals.zoomHorizontallyInput.addEventListener('blur', function(e) { onZoomHorizontallyBlur(this); } );
 		_globals.zoomHorizontallyIcon.addEventListener('mousedown', 
@@ -452,7 +480,15 @@ function initLayout() {
 		_globals.expandPlusIcon.setAttribute( 'style', 'display:none' );
 		_globals.expandInput.addEventListener('input', function(e) { filterInput(this,'([^0-9]+)',1,100,1); } );
 		_globals.expandInput.addEventListener('blur', function(e) { onExpandBlur(); } );
-	} else {
+// NEW!!
+		_globals.clipLeftInput.addEventListener('input', function() { filterInput(this); } );
+		_globals.clipLeftInput.addEventListener('blur', function(e) { onClipLeftBlur(this); } );
+		_globals.clipLeftMinusIcon.setAttribute( 'style', 'display:none' );
+		_globals.clipLeftPlusIcon.setAttribute( 'style', 'display:none' );
+		// _globals.clipLeftIcon.addEventListener('mousedown', function(e) { onClipLeftIcon(this, e, _globals.clipLeftInput); } );
+	} 
+	else 
+	{
 		_globals.zoomHorizontallyInput.setAttribute( 'style', 'display:none' );
 		_globals.zoomVerticallyInput.setAttribute( 'style', 'display:none' );
 		_globals.zoomHorizontallyIcon.setAttribute( 'style', 'display:none' );
@@ -465,6 +501,10 @@ function initLayout() {
 			function(e) { onZoomVerticallyMinusIcon(this, e, _globals.zoomVerticallyInput); } );
 		_globals.zoomVerticallyPlusIcon.addEventListener('mousedown', 
 			function(e) { onZoomVerticallyPlusIcon(this, e, _globals.zoomVerticallyInput); } );
+
+// NEW!!
+		_globals.clipLeftIcon.setAttribute( 'style', 'display:none' );
+		_globals.clipLeftInput.setAttribute( 'style', 'display:none' );	
 
 		_globals.expandIcon.setAttribute( 'style', 'display:none' );
 		_globals.expandMinusIcon.addEventListener('mousedown', 
@@ -522,6 +562,12 @@ function displayHeaderAndFooterInfo() {
 	_globals.zoomHorizontallyIcon.setAttribute('src',_icons.zoomHorizontally);
 	_globals.zoomHorizontallyPlusIcon.setAttribute('src',_icons.zoomHorizontallyPlus);
 	_globals.zoomHorizontallyMinusIcon.setAttribute('src',_icons.zoomHorizontallyMinus);
+
+// NEW!!
+	_globals.clipLeftDiv.title = _texts[_globals.lang].clipLeftTitle;
+	_globals.clipLeftIcon.setAttribute('src',_icons.clipLeft);
+	_globals.clipLeftPlusIcon.setAttribute('src',_icons.zoomHorizontallyPlus);
+	_globals.clipLeftMinusIcon.setAttribute('src',_icons.zoomHorizontallyMinus);
 
 	_globals.expandAllIcon.title = _texts[_globals.lang].expandAllIconTitle;
 	_globals.expandAllIcon.setAttribute('src',_icons.expandAll);

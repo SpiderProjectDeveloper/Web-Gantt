@@ -1,4 +1,4 @@
-import { _globals } from './globals.js'
+import { _globals, _data } from './globals.js'
 import { _texts } from './texts.js';
 import { dateIntoSpiderDateString } from './utils.js';
 import { chatImageAttachListener, clearImageAttachedToMessageEdited, isImageAttachedToMessageEdited, 
@@ -6,11 +6,12 @@ import { chatImageAttachListener, clearImageAttachedToMessageEdited, isImageAtta
 
 function assignActivityCredentials(obj) {
 	obj.sessId = _globals.chatActivityCredentials.sessId;
-	obj.user = _globals.chatActivityCredentials.user;
-	obj.projectId = _globals.chatActivityCredentials.projectId;
+	obj.user = decodeURIComponent(_globals.chatActivityCredentials.user);
+	obj.projectId = decodeURIComponent(_globals.chatActivityCredentials.projectId);
 	obj.activity = _globals.chatActivityCredentials.activity;
 	obj.level = _globals.chatActivityCredentials.level;
 	obj.parent = _globals.chatActivityCredentials.parent;
+	obj.wbsCode = _data.project.wbsCode;
 }
 
 export function loadAndDisplayChat( activityLevel, activityCode, activityParent, activityName ) 
@@ -362,7 +363,7 @@ function addChatItem( dataItem, addFirst = false ) {
 		removeElem.className = 'chat-remove';
 		dateElem.appendChild(removeElem);
 		removeElem.innerHTML = _globals.chatRemoveHTML;
-		removeElem.onclick = function(e) { remove( dataItem ) };
+		removeElem.onclick = function(e) { remove( dataItem, this ) };
 		dataItem.meta.removeElem = removeElem;
 
 		let updateElem = document.createElement('span');
@@ -380,10 +381,16 @@ function addChatItem( dataItem, addFirst = false ) {
 	}
 }
 
-function remove( dataItem ) {
+function remove( dataItem, removeElem ) {
+	if( removeElem.disabled ) {
+		return;
+	}
+	removeElem.disabled = true;
+
 	let xhttp = new XMLHttpRequest();
 	xhttp.onreadystatechange = function() {
 		if (xhttp.readyState == 4 ) {
+			removeElem.disabled = false;
 			if( xhttp.status == 200 ) {
 				let dataObj = parseJsonString(xhttp.responseText);
 				if( dataObj === null || dataObj.errcode !== 0 ) {
@@ -401,19 +408,21 @@ function remove( dataItem ) {
 	xhttp.open("POST", _globals.chatServer + _globals.chatRemoveUrl, true);
 	xhttp.setRequestHeader("Cache-Control", "no-cache");
 	xhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');		
-	xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+	xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	xhttp.send( jsonString );
 }
 
 
 function insertOrUpdate() {
-	//if( _globals.chatMessageInputElem.value.length === 0 ) {
-	//	displaySysMessage( _texts[_globals.lang].chatMessageCanNotBeEmpty )
-	//	return;
-	//}
+	if( _globals.chatSendButtonElem.disabled ) {
+		return;
+	}
+	_globals.chatSendButtonElem.disabled = true; // Disabling the "send" button to prevent clicking it twice
+
 	let xhttp = new XMLHttpRequest();
 	xhttp.onreadystatechange = function() {
 		if (xhttp.readyState == 4 ) {
+			_globals.chatSendButtonElem.disabled = false;	// Enabling the "send" button 
 			if( xhttp.status == 200 ) {
 				let dataObj = parseJsonString(xhttp.responseText);
 				if( dataObj === null || dataObj.errcode !== 0 ) {

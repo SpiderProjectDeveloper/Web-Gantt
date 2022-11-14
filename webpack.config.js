@@ -14,8 +14,8 @@ module.exports = {
 			app.get('/.gantt_data', (req, res) => {
 			  res.sendFile(path.resolve(__dirname, 'public/data.php'));
 			});
-			app.get('/.get_project_props', (req, res) => {
-			  res.sendFile(path.resolve(__dirname, 'public/get_project_props.json'));
+			app.get('/.get_project_last_updates', (req, res) => {
+			  res.sendFile(path.resolve(__dirname, 'public/get_project_last_updates.json'));
 			});
 			app.post('/.save_gantt', (req, res) => {
 				res.send( JSON.stringify( { errcode:0 } ) );

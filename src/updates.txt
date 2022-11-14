@@ -1,0 +1,53 @@
+﻿index.js:
+if( d.FactFin ) {
+			d.status = 100; // finished
+			d.displayStartInSeconds = d.FactStartInSeconds; 
+			d.displayFinInSeconds = d.FactFinInSeconds;
+			d.displayRestartInSeconds = null; 
+		} else if( 
+			(d.FactStartInSeconds === -1 && d.AsapStartInSeconds === -1) || 
+			(d.FactFinInSeconds === -1 && d.AsapFinInSeconds === -1) 
+		)
+		{
+			d.displayStartInSeconds = null; 
+			d.displayFinInSeconds = null;
+			d.displayRestartInSeconds = null;
+		} 
+
+helpers.js:
+557:
+if( _globals.notHiddenOperationsLength > height ) {		
+		let min = Number.MAX_VALUE;
+		let max = Number.MIN_VALUE;
+		for( let i = 0 ; i < newVisibleHeight ; i++ ) {
+			let d = _data.activities[i];
+			if( _data.activities[i].displayStartInSeconds === null ) continue; // If no dates are set at all...
+
+			if( d.displayStartInSeconds < min ) {
+				min = d.displayStartInSeconds;
+			} 
+			if( d.displayFinInSeconds > max ) {
+				max = d.displayFinInSeconds;
+			}
+		}
+		newVisibleLeft = min;
+		newVisibleWidth = max - min;
+	}
+
+drawgantt.js:
+103: 
+// If no start or fin date - skipping it...
+		if( _data.activities[i].displayStartInSeconds === null ) {
+			_data.activities[i].skip = true;
+			rectCounter++;
+			continue;
+		} else {
+			_data.activities[i].skip = false;
+		}
+if( !atLeastOneOpOnScreen && !init ) {
+			continue;
+		}
+
+202:
+		if( !_data.activities[i].onScreen && !_data.meta[i].visible ) continue;
+		if( _data.activities[i].skip ) continue;

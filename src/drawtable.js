@@ -2,10 +2,10 @@ import { _settings } from './settings.js';
 import { _globals, _data } from './globals.js';
 import { _texts } from './texts.js';
 import { drawGantt, drawVerticalScroll } from './drawgantt.js';
-import { displayEditBoxWithData, displayEditField } from './boxes.js';
+import { displayEditBoxWithData, displayEditField, displayConfirmationBox, hideConfirmationBox } from './boxes.js';
 import { onTableScrollSVGSliderTouchStart, onTableScrollSVGSliderTouchMove, onTableScrollSVGSliderTouchEnd } from './on.js';
 import { isEditable, operToScreen, setVisibleTopAndHeightAfterExpand, setNewColumnWidth,
-    displayYZoomFactor, getFormatForTableCellAndValue } from './helpers.js';
+    displayYZoomFactor, getFormatForTableCellAndValue, createCodeLevelParentKey } from './helpers.js';
 import { createRect, createSVG, createForeignObjectWithText, createCircle, createText, decColorToString  } from './utils.js';
 import { loadAndDisplayChat } from './chat';
 
@@ -25,15 +25,17 @@ export function drawTableHeader( init=false, shiftOnly=false ) {
 			{ id:'tableHeaderBkgr', fill:_settings.tableHeaderFillColor } ); // backgroud rect
 		_globals.tableHeaderSVG.appendChild( _globals.tableHeaderSVGBkgr );			
 
+		createTopLeftIcons();
+
 		let left = _data.table[0].width;
 		for( let col = 1 ; col < _data.table.length ; col++ ) {
 			let rectWidth = _data.table[col].width - _settings.tableHeaderColumnHMargin * 2; // The width of SVG-container
 			let svg = createSVG( left+_settings.tableHeaderColumnHMargin, 0, rectWidth, _globals.tableHeaderSVGHeight, // SVG-container
 				{ id:'tableHeaderColumnNameSVG'+col, 'fill':_settings.tableHeaderFillColor } );
 			left += _data.table[col].width;
-			let props = { id:'tableHeaderColumnNameBkgr'+col, 'fill':_settings.tableHeaderFillColor, 
-				'stroke':_settings.tableHeaderBorderColor, 'strokeWidth':1 };
-			let rect = createRect(0, 0, rectWidth, _globals.tableHeaderSVGHeight, props ); // Background RECT
+			//let props = { id:'tableHeaderColumnNameBkgr'+col, 'fill':_settings.tableHeaderFillColor, 
+			//	'stroke':_settings.tableHeaderBorderColor, 'strokeWidth':1 };
+			//let rect = createRect(0, 0, rectWidth, _globals.tableHeaderSVGHeight, props ); // Background RECT
 			//rect.onmouseover = function(e) { this.setAttributeNS( null, 'stroke', _settings.tableHeaderActiveBorderColor); };
 			//rect.onmouseout = function(e) { this.setAttributeNS( null, 'stroke', _settings.tableHeaderBorderColor); };
 			let title = _data.table[col].name;
@@ -42,19 +44,22 @@ export function drawTableHeader( init=false, shiftOnly=false ) {
 			}
 			
 			// TEXT
-			let text = createForeignObjectWithText( title, 1, 0, rectWidth-2, _globals.tableHeaderSVGHeight, 
-				{ id:'tableHeaderColumnNameText'+col, textAlign:'center', fontSize:_settings.tableMaxFontSize, color:_settings.tableHeaderFontColor } );
-
-			svg.appendChild( rect );			
+			let text;
+			text = createForeignObjectWithText( title, 1, 0, rectWidth-2, _globals.tableHeaderSVGHeight, 
+				{ id:'tableHeaderColumnNameText'+col, textAlign: ((col>0)?'center':'left'), 
+					fontSize:_settings.tableMaxFontSize, color:_settings.tableHeaderFontColor } 
+			);
+			//svg.appendChild( rect );			
 			svg.appendChild( text );
 			_globals.tableHeaderSVG.appendChild( svg );
 			
-			if( !_globals.touchDevice) {
+			if( !_globals.touchDevice ) {
 				svg.addEventListener( 'mousedown', onTableHeaderMouseDown );
+				svg.style.cursor = 'hand';
 			} else { 
 				; //svg.addEventListener( 'touchstart', onTableHeaderTouchStart ); 
 			}
-			svg.style.cursor = 'hand';
+
 			svg.dataset.columnNumber = col;
 		}
 
@@ -84,8 +89,8 @@ export function drawTableHeader( init=false, shiftOnly=false ) {
 				let svg = document.getElementById('tableHeaderColumnNameSVG'+col);
 				svg.setAttributeNS(null, 'x', left + _settings.tableHeaderColumnHMargin);
 				svg.setAttributeNS(null, 'width', rectWidth);			
-				let rect = document.getElementById('tableHeaderColumnNameBkgr'+col);
-				rect.setAttributeNS(null, 'width', rectWidth);			
+				//let rect = document.getElementById('tableHeaderColumnNameBkgr'+col);
+				//rect.setAttributeNS(null, 'width', rectWidth);			
 				let text = document.getElementById('tableHeaderColumnNameText'+col);
 				text.setAttributeNS(null, 'width', rectWidth-2);							
 			}
@@ -172,20 +177,26 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 		let lineMiddle = lineBottom - lineHeight/2;
 
 		// Expand functionality [+] / [-]
-		let expandText;
-		let expandTextId = getExpandIconId(i);
+		let expandIcon;
+		let expandIconId = getExpandIconId(i);
 
 		let chatIcon;
 		let chatIconId = getChatIconId(i);
 
 		if( init ) {
-			chatIcon = createChatIcon(i, chatIconId, fontSize, lineTop);
+			chatIcon = createChatIcon(i, chatIconId, fontSize, lineTop );
 			if( chatIcon ) {
 				document.getElementById('tableColumnSVG0').appendChild(chatIcon);
+				if( _settings.hasNewMessagesInChatKey in _data.activities[i] && _data.activities[i][_settings.hasNewMessagesInChatKey] > 0 ) {
+					_data.chatUnseenMessagesSet.add(i);
+				}			
+				if( _settings.numberOfMessagesInChatKey in _data.activities[i] && _data.activities[i][_settings.numberOfMessagesInChatKey] > 0 ) {
+					_data.chatNonEmptyMessgesSet.add(i);
+				}			
 			}	
 
-			expandText = createExpandIcon( i, expandTextId, fontSize, lineTop );
-			document.getElementById('tableColumnSVG0').appendChild(expandText);
+			expandIcon = createExpandIcon( i, expandIconId, fontSize, lineTop );
+			document.getElementById('tableColumnSVG0').appendChild(expandIcon);
 
 		 	// Fields inside columns
 			for( let col = 1 ; col < _data.table.length ; col++ ) {
@@ -208,7 +219,13 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 					id:('tableColumn'+col+'Row'+i), fill:color, textAnchor:'start', 
 					fontSize:fontSize, fontStyle:fontStyle, fontWeight:fontWeight, alignmentBaseline:'middle' 
 				};
-				if( _data.table[col].type === 'float' || _data.table[col].type === 'int' ) {
+				if( _data.table[col].isLink ) {		// If it's is a link 
+					textProperties.isLink = true;
+				} 
+				if( textProperties.isLink ) {
+					; 	// If link use default text properties...
+				}
+				else if( _data.table[col].type === 'number' ) {
 					textX = columnWidthToUse - _settings.tableColumnTextMargin*2;
 					textProperties.textAnchor = 'end';
 				} else if( _data.table[col].type === 'string' || _data.table[col].type === 'text' ) { // For strings "format" stands for alignment
@@ -285,15 +302,15 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 					chatIcon.setAttributeNS(null,'display','none');
 				}
 			}
-			expandText = document.getElementById(expandTextId);
+			expandIcon = document.getElementById(expandIconId);
 			if( fontSize >= _settings.tableMinFontSize ) { // If font size is big enough to make text visible at screen.
-				expandText.setAttributeNS( null,'x', getExpandIconX(fontSize) );
-				expandText.setAttributeNS( null,'y', getExpandIconY(lineTop) );
-				expandText.firstChild.nodeValue = getExpandIconText(i);
-				expandText.style.fontSize = fontSize;
-				expandText.setAttributeNS(null,'display','block');				
+				expandIcon.setAttributeNS( null,'x', getExpandIconX(fontSize) );
+				expandIcon.setAttributeNS( null,'y', getExpandIconY(lineTop) );
+				expandIcon.firstChild.nodeValue = getExpandIconText(i);
+				expandIcon.style.fontSize = fontSize;
+				expandIcon.setAttributeNS(null,'display','block');				
 			} else {
-				expandText.setAttributeNS(null,'display','none');
+				expandIcon.setAttributeNS(null,'display','none');
 			}
 
 			for( let col = 1 ; col < _data.table.length ; col++ ) {
@@ -304,7 +321,7 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 					if( _data.table[col].type !== 'signal' ) {
 						textEl.setAttributeNS(null,'y',lineMiddle);
 						textEl.style.fontSize = fontSize;
-						if( _data.table[col].type == 'float' || _data.table[col].type == 'int' ) {
+						if( _data.table[col].type == 'number' ) {
 							textEl.setAttributeNS( null, 'x', columnWidthToUse - _settings.tableColumnTextMargin*2 );
 						} else if( _data.table[col].type == 'string' || _data.table[col].type == 'text' ) { // For strings "format" stands for alignment
 							if( _data.table[col].format == 1 ) { // Align right
@@ -334,13 +351,13 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 			}
 		}
 
-		if( _data.meta[i].visible && expandText.style.display == 'none' && (fontSize >= _settings.tableMinFontSize) ) {
+		if( _data.meta[i].visible && expandIcon.style.display == 'none' && (fontSize >= _settings.tableMinFontSize) ) {
 			for( let col = 0 ; col < _data.table.length ; col++ ) {
 				let id = 'tableColumn'+col+'Row'+i;
 				let el = document.getElementById(id);
 				el.setAttributeNS(null,'display','block');
 			}
-		} else if( (!_data.meta[i].visible && expandText.style.display != 'none') || (fontSize < _settings.tableMinFontSize) ) {
+		} else if( (!_data.meta[i].visible && expandIcon.style.display != 'none') || (fontSize < _settings.tableMinFontSize) ) {
 			for( let col = 0 ; col < _data.table.length ; col++ ) {
 				let id = 'tableColumn'+col+'Row'+i;
 				let el = document.getElementById(id);
@@ -526,11 +543,8 @@ function createChatIcon( i, chatIconId, fontSize, lineTop ) {
 	if( !_globals.chatPort ) {
 		return null;
 	}
-	let chatMark = '✉'; // '☶'; // '☷'; // '🖃'; // '💬'; // '☰';
-	let chatMarkColor = getChatIconColor(i);
-	// let chatMarkTitle = '';
-	let chatIcon = createText( chatMark, getChatIconX(), getChatIconY(lineTop), 
-		{ id:chatIconId, fill:chatMarkColor, fontSize:fontSize, textAnchor:'start', alignmentBaseline:'hanging' } );
+	let chatIcon = createText( _settings.chatMark, getChatIconX(), getChatIconY(lineTop), 
+		{ id:chatIconId, fill:getChatIconColor(i), fontSize:fontSize, textAnchor:'start', alignmentBaseline:'hanging' } );
 
 	chatIcon.dataset.operationNumber=i;
 	chatIcon.style.cursor = 'pointer';
@@ -551,6 +565,129 @@ function createChatIcon( i, chatIconId, fontSize, lineTop ) {
 	}
 
 	return chatIcon;
+}
+
+export function updateChatIconsInTable( activities ) {
+	if( !activities || !activities.length ) {
+		return;
+	}
+	let activitiesReceivedSet = new Set();	// To remember which activities are non empty or new 
+	for( let i = 0 ; i < activities.length ; i++ ) {
+		let k = createCodeLevelParentKey( activities[i] );
+		if( k in _data.codeLevelParentMap ) {
+			let ai = _data.codeLevelParentMap[k];
+			activitiesReceivedSet.add(ai);
+			if( _settings.hasNewMessagesInChatKey in activities[i] ) {
+				_data.activities[ai][_settings.hasNewMessagesInChatKey] = activities[i][_settings.hasNewMessagesInChatKey];
+			} else {
+				_data.activities[ai][_settings.hasNewMessagesInChatKey] = 0;
+			}
+			if( _settings.numberOfMessagesInChatKey in activities[i] ) {
+				_data.activities[ai][_settings.numberOfMessagesInChatKey] = activities[i][_settings.numberOfMessagesInChatKey];
+			} else {
+				_data.activities[ai][_settings.numberOfMessagesInChatKey] = 0;
+			}
+			let id = getChatIconId(ai);				
+			let elem = document.getElementById(id)
+			if( elem ) {
+				let color = getChatIconColor(ai);
+				elem.setAttributeNS(null,'fill', color );
+			}
+
+			if( _data.chatUnseenMessagesSet.has(ai) ) {
+				if( !(_settings.hasNewMessagesInChatKey in _data.activities[ai]) || _data.activities[ai][_settings.hasNewMessagesInChatKey] === 0 ) {
+					_data.chatUnseenMessagesSet.delete(ai);
+				}
+			} else {
+				if( _settings.hasNewMessagesInChatKey in _data.activities[ai] && _data.activities[ai][_settings.hasNewMessagesInChatKey] > 0 ) {
+					_data.chatUnseenMessagesSet.add(ai);
+				}
+			}
+
+			if( _data.chatNonEmptyMessgesSet.has(ai) ) {
+				if( !_data.activities[ai][_settings.numberOfMessagesInChatKey] ) {
+					_data.chatNonEmptyMessgesSet.delete(ai);
+				}
+			} else {
+				if( _data.activities[ai][_settings.numberOfMessagesInChatKey] ) {
+					_data.chatNonEmptyMessgesSet.add(ai);
+				}
+			}
+		}
+	}
+
+	// Displaying as "empty" chat icons which haven't been empty before 
+	// (those activities not received in an update request)
+	for( let ai of _data.chatNonEmptyMessgesSet ) {
+		if( activitiesReceivedSet.has(ai) ) {
+			continue;
+		} 
+		_data.activities[ai][_settings.hasNewMessagesInChatKey] = 0;
+		_data.activities[ai][_settings.numberOfMessagesInChatKey] = 0;
+		let id = getChatIconId(ai);				
+		let elem = document.getElementById(id)
+		if( elem ) {
+			let color = getChatIconColor(ai);
+			elem.setAttributeNS(null,'fill', color );
+		}
+		_data.chatNonEmptyMessgesSet.delete(ai);
+	}
+
+	document.getElementById('tableHeaderColumnNameText0').setAttributeNS( null, 'fill', getTopLeftChatIconColor() );
+} 
+
+function getTopLeftChatIconColor() {
+	if(_data.chatUnseenMessagesSet.size > 0) return _settings.newMessagesInChatColor;
+	if(_data.chatNonEmptyMessgesSet.size > 0) return _settings.notEmptyChatColor;
+	return _settings.emptyChatColor; 
+}
+
+function createTopLeftIcons() {
+	if( !_globals.chatPort ) {
+		return;
+	}
+	_data.chatUnseenMessagesSet = new Set();
+	_data.chatNonEmptyMessgesSet = new Set();
+	let svg = createSVG( _settings.tableHeaderColumnHMargin, 0, _data.table[0].width, _globals.tableHeaderSVGHeight, // SVG-container
+		{ id: 'tableHeaderColumnNameSVG0', 'fill': _settings.tableHeaderFillColor } 
+	);
+	let text = createText( _settings.chatMark, 2, 3, 
+		{ id: 'tableHeaderColumnNameText0', fill: getTopLeftChatIconColor(), textAnchor:'start', 
+			fontSize:_settings.tableMaxFontSize, alignmentBaseline:'hanging' } 
+	);
+	text.style.cursor='pointer';
+	text.addEventListener('mousedown', function(e) {
+
+		const formatLinkToChatForActivity = function(i, color) {
+			let activity = _data.activities[i].Name;
+			let id = getChatIconId(i);
+			let style = `text-align:left; margin:8px 0px 8px 10%; color:${color}; font-size:90%; cursor:pointer;`;
+			return `<div style='${style}' onclick="document.getElementById('${id}').onmousedown();">${activity}</div>`;
+		}
+
+		let html = '';
+		if( _data.chatUnseenMessagesSet.size > 0 ) {
+			html += `<div style='text-align:center; margin-bottom:14px; font-size:100%;'>${_texts[_globals.lang].chatUnseenTitle}</div>`;
+			for( let i of _data.chatUnseenMessagesSet ) {
+				html += formatLinkToChatForActivity(i, '#4444aa');
+			}
+		}
+		if( _data.chatNonEmptyMessgesSet.size > 0 ) {
+			if( html.length > 0 ) {
+				html += `<hr/>`;
+			}
+			html += "<div style='align:center; font-size:120%; margin:4px 8px 12px 8px;'>✉</div>";
+			for( let i of _data.chatNonEmptyMessgesSet ) {
+				html += formatLinkToChatForActivity(i, '#444444');
+			}
+		}
+		if( html.length > 0 ) {
+			displayConfirmationBox(html);
+		}
+	});
+
+	svg.appendChild( text );
+	_globals.tableHeaderSVG.appendChild( svg );
 }
 
 
@@ -578,6 +715,7 @@ function getExpandIconText(i) {
 			return '►'; // ▶				
 		}
 	}
+	return '';
 }
 
 function createExpandIcon( i, expandIconId, fontSize, lineTop ) {
@@ -591,7 +729,7 @@ function createExpandIcon( i, expandIconId, fontSize, lineTop ) {
 		expandIcon.onmousedown = function(e) {
 			let operationNumber = Number(this.dataset.operationNumber); 
 			if( _data.meta[operationNumber].expanded == true ) {
-				for( let iO = 0 ; iO < _data.activities.length ; iO++ ) {
+				for( let iO = operationNumber+1 ; iO < _data.activities.length ; iO++ ) {
 					for( let iP = 0 ; iP < _data.meta[iO].parents.length ; iP++ ) {
 							if( _data.meta[iO].parents[iP] == operationNumber ) {
 							_data.meta[iO].visible = false;
@@ -611,7 +749,6 @@ function createExpandIcon( i, expandIconId, fontSize, lineTop ) {
 						if( _data.meta[iParent].expandable && _data.meta[iParent].expanded == false ) {
 							break;
 						}
-
 					}
 				}
 				_data.meta[operationNumber].expanded = true;

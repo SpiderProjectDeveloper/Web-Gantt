@@ -4,9 +4,11 @@ import { drawTableHeader, drawTableContent, drawTableScroll } from './drawtable.
 import { drawGantt, drawGanttHScroll, drawVerticalScroll } from './drawgantt.js';
 import { drawTimeScale } from './drawtimescale.js';
 import { drawAll, initLayoutCoords, moveColumnOfTable, setNewColumnWidth, setVerticalSplitterWidth, 
-    setVerticalScrollSVGThick, setTableScrollSVGThick, setGanttHScrollSVGThick, 
-    validateGanttLeft, validateTopAndHeight, getGanttMaxLeft,
-	expandToLevel, zoomXR, zoomYR, zoomXYR, moveXR, moveYR } from './helpers.js';
+  setVerticalScrollSVGThick, setTableScrollSVGThick, setGanttHScrollSVGThick, 
+  validateGanttLeft, validateTopAndHeight, getGanttMaxLeft,
+	expandToLevel, zoomXR, zoomYR, zoomXYR, moveXR, moveYR, 
+	calculateHorizontalZoomByVerticalZoom, displayXZoomFactor  // NEW!!
+} from './helpers.js';
 import { setCookie, filterInput, getElementPosition, getCoordinatesOfClickOnImage } from './utils.js';
 
 // **** ON Section
@@ -459,13 +461,15 @@ export function onVerticalScrollSVGSliderTouchMove(e) {
 }
 
 
-export function onVerticalScrollSVGSliderTouchEnd(e) {
+export function onVerticalScrollSVGSliderTouchEnd(e) 
+{
 	_globals.verticalScrollCaptured = false;
 	_globals.verticalScrollSVGSlider.setAttributeNS(null,'fill',_settings.scrollSliderColor);
 }
 
 
-export function onGanttWheel(e) {
+export function onGanttWheel(e) 
+{
 	let delta = e.deltaY || e.detail || e.wheelDelta;
 	if( e.shiftKey ) {
 		let zoomFactorChange;
@@ -507,13 +511,15 @@ export function onTimeWheel(e) {
 }
 
 
-export function onZoomHorizontallyInput(id, e) {
+export function onZoomHorizontallyInput(id, e) 
+{
 	let value = filterInput(id);
 	zoomXR( (parseInt(value) - Math.floor(_data.visibleMaxWidth * 100.0 / _globals.ganttVisibleWidth + 0.5)) / 100.0 );
 }
 
 
-export function onZoomHorizontallyBlur(id) {
+export function onZoomHorizontallyBlur(id) 
+{
 	let value = parseInt(id.value);
 	if( isNaN(value) ) {
 		value = 100;
@@ -530,7 +536,8 @@ export function onZoomHorizontallyBlur(id) {
 }
 
 
-export function onZoomHorizontallyIcon(id, e, inputId) {
+export function onZoomHorizontallyIcon(id, e, inputId) 
+{
 	let c = getCoordinatesOfClickOnImage( id, e );
 	let value = parseInt(inputId.value);
 	if( c[2] == 0 && !isNaN(value) ) { // Upper half
@@ -543,7 +550,8 @@ export function onZoomHorizontallyIcon(id, e, inputId) {
 }
 
 
-export function onZoomHorizontallyMinusIcon(id, e, inputId) {
+export function onZoomHorizontallyMinusIcon(id, e, inputId) 
+{
 	let c = getCoordinatesOfClickOnImage( id, e );
 	let value = parseInt(inputId.value);
 	if( !isNaN(value) ) { 
@@ -553,7 +561,8 @@ export function onZoomHorizontallyMinusIcon(id, e, inputId) {
 }
 
 
-export function onZoomHorizontallyPlusIcon(id, e, inputId) {
+export function onZoomHorizontallyPlusIcon(id, e, inputId) 
+{
 	let c = getCoordinatesOfClickOnImage( id, e );
 	let value = parseInt(inputId.value);
 	if( !isNaN(value) ) { 
@@ -563,7 +572,8 @@ export function onZoomHorizontallyPlusIcon(id, e, inputId) {
 }
 
 
-export function onZoomVerticallyBlur(id) {
+export function onZoomVerticallyBlur(id) 
+{
 	let value = parseInt(id.value);
 	if( isNaN(value) ) {
 		value = 100;
@@ -576,8 +586,54 @@ export function onZoomVerticallyBlur(id) {
 	zoomYR( (parseInt(value) - parseInt(_globals.notHiddenOperationsLength * 100.0 / _globals.visibleHeight + 0.5)) / 100.0 ); 
 }
 
+// NEW!!
+export function onClipLeftBlur(id) 
+{
+	let value = parseInt(id.value);
+	if( isNaN(value) ) {
+		value = 0;
+	} else {
+		if( value < 0 ) {
+			value = 0;
+		} else if( value > 99 ) {
+			value = 99;
+		}
+	}
+	id.value = value;
+	let newMin = _data.startMinInSeconds + (_data.finMaxInSeconds - _data.startMinInSeconds) * value / 100;
+	_data.startFinSeconds = _data.finMaxInSeconds - newMin;
+	_data.visibleMin = newMin; // - (_data.finMaxInSeconds-_data.startMinInSeconds)/20.0;
+	_data.visibleMaxWidth = _data.visibleMax - _data.visibleMin;
 
-export function onZoomVerticallyIcon(id, e, inputId) {
+	let newZoom = calculateHorizontalZoomByVerticalZoom( 0, _settings.readableNumberOfOperations );
+	_globals.visibleTop = newZoom[0];
+	_globals.visibleHeight = newZoom[1];
+	_globals.ganttVisibleLeft = newZoom[2];
+	_globals.ganttVisibleWidth = newZoom[3];  
+
+	displayXZoomFactor();
+
+	drawAll();
+}
+
+// NEW!!
+export function onClipLeftIcon(id, e, inputId) 
+{
+	let c = getCoordinatesOfClickOnImage( id, e );
+	let value = parseInt(inputId.value);
+	if( c[2] == 0 && !isNaN(value) ) { // Upper half
+		value -= 10; 
+	} else {
+		value += 10;
+	}
+	if( value < 0 ) value = 0;
+	if( value > 99) value = 99;
+	inputId.value = value;
+	onClipLeftBlur(inputId);
+}
+
+export function onZoomVerticallyIcon(id, e, inputId) 
+{
 	let c = getCoordinatesOfClickOnImage( id, e );
 	let value = parseInt(inputId.value);
 	if( c[3] == 0 && !isNaN(value)) { // Upper half

@@ -31,5 +31,6 @@ export var _settings = {
 	ganttSVGCursor:'zoom-in', ganttSVGCapturedCursor:'pointer', timeSVGCursor:'zoom-in',
 	readableNumberOfOperations:28, minNumberOfOperationsOnScreen:10, maxNumberOfOperationsOnScreen:50,
 	numberOfMessagesInChatKey:'f_MessagesNumber', hasNewMessagesInChatKey: 'f_MessagesNew',
-	emptyChatColor: '#cfcfcf', notEmptyChatColor: '#0f0f0f', newMessagesInChatColor: '#ff4444'
+	emptyChatColor: '#cfcfcf', notEmptyChatColor: '#0f0f0f', newMessagesInChatColor: '#ff4444',
+	chatMark: '✉'
 };

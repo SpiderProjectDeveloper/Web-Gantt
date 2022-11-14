@@ -105,7 +105,6 @@ export function createText( textString, x, y, properties ) {
 	text.setAttributeNS(null,'x', x );
 	text.setAttributeNS(null,'y', y );
 	if( 'id' in properties ) {
-		let temp = document.getElementById(properties.id);
 		text.setAttributeNS(null, 'id', properties.id );		
 
 	} 
@@ -152,8 +151,96 @@ export function createText( textString, x, y, properties ) {
 	if( 'clipPath' in properties ) {
 		text.setAttributeNS(null,'clip-path', properties.clipPath );
 	}
-	text.appendChild( document.createTextNode( textString ) );
+
+	// If the text is a link
+	if( properties.isLink ) {
+		if( textString.indexOf('|') < 0 ) {	//	
+			attachOpenLinkFunctionality( text, textString );
+		} else {
+			attachOpenLinksFunctionality(text, textString);
+		}
+	} else {
+		text.appendChild( document.createTextNode( textString ) );
+	}
 	return text;
+}
+
+function attachOpenLinkFunctionality(textElem, textString) {
+
+	let textHrefPair = textString.split('>>');
+	let href;
+	let text;
+	if( textHrefPair == null || textHrefPair.length < 2 ) {
+		href = textString;
+		text = textString;
+	} else {
+		href = textHrefPair[1];
+		text = textHrefPair[0];
+	}
+	if( !href || !text ) return;
+	if( !href.startsWith('http') ) return;
+
+	let xlinkAttr = 'http://www.w3.org/1999/xlink';
+	textElem.setAttribute('xmlns:xlink', xlinkAttr );
+	let a = document.createElementNS(_settings.NS, 'a');
+	a.setAttributeNS( xlinkAttr, 'href', href );
+	a.setAttribute( 'target', '_blank' );
+	a.appendChild(document.createTextNode( text ));
+	textElem.appendChild(a);	
+}
+
+
+function attachOpenLinksFunctionality(textElem, textString) {
+
+	function displayTableLinkMenu(e) {	
+		let links = textString.split('|');
+		if( links == null || links.length == 0 ) return;
+		let items=[];
+		for( let link of links ) {
+			let textHrefPair = link.split('>>');
+			if( textHrefPair == null || textHrefPair.length == 0 ) continue;
+			let href = (textHrefPair.length == 2) ? textHrefPair[1] : textHrefPair[0]; 
+			if( !href || !textHrefPair[0] ) continue;
+			if( !href.startsWith('http') ) continue;
+			items.push( { text: textHrefPair[0], href: href } );
+		}
+		if( items.legth == 0 ) return;
+
+		let menu = document.createElement('div');
+		menu.className = 'tablelinkmenu';
+		if( e.clientX < window.innerWidth/2 ) {
+			menu.style.left = (e.clientX-4) + 'px';
+		} else {
+			menu.style.left = (e.clientX-4) + 'px';
+		}
+		if( e.clientY < window.innerHeight/2 ) {
+			menu.style.top = (e.clientY-4) + 'px';
+		} else {
+			menu.style.top = (e.clientY-4) + 'px';
+		}
+		menu.style.display = 'block';
+		document.body.appendChild(menu);		
+
+		menu.addEventListener('mouseleave', (e) => {
+			menu.style.display = 'none';
+			while(menu.firstChild) {
+				menu.removeChild(menu.firstChild);
+			}
+			document.body.removeChild(menu);
+		});
+		
+		for( let i of items ) {
+			let div = document.createElement('div');
+			div.className = 'tablelinkmenu-item';
+			div.innerHTML = `<a href='${i.href}' target=_blank>${i.text}</a>`;
+			menu.appendChild(div);
+		}
+	}	
+
+	textElem.addEventListener('mousedown', (e) => {
+		displayTableLinkMenu(e)
+	});	
+	textElem.appendChild( document.createTextNode( String.fromCharCode(0x2630) ) );
 }
 
 export function createLine( x1, y1, x2, y2, properties ) {
@@ -166,10 +253,16 @@ export function createLine( x1, y1, x2, y2, properties ) {
 			line.setAttributeNS(null,'marker-end', 'url(#arrow)');
 		}
 	}
-	line.setAttributeNS(null, 'x1', x1 ); 
-	line.setAttributeNS(null, 'y1', y1 ); 
-	line.setAttributeNS(null, 'x2', x2 ); 
-	line.setAttributeNS(null, 'y2', y2 );
+	
+	if( Number.isFinite(x1) && Number.isFinite(y1) && Number.isFinite(x2) && Number.isFinite(y2) ) {
+		line.setAttributeNS(null, 'x1', x1 ); 
+		line.setAttributeNS(null, 'y1', y1 ); 
+		line.setAttributeNS(null, 'x2', x2 ); 
+		line.setAttributeNS(null, 'y2', y2 );
+	} else {
+		line.setAttributeNS(null, 'display', 'none');
+	}
+
 	if( 'fill' in properties ) {
 		line.setAttributeNS(null, 'fill', properties.fill );
 	} 
@@ -670,47 +763,37 @@ export function trimString( str ) {
 }
 
 
-export function formatNumberStringForTable( str, type='int', radix=2 ) {
+export function formatNumberStringForTable( str, radix=2 ) {
 	let ret = '';
 	let intValue;   	
 	let isNegative = false;
 
-	if( type === 'float' ) {
-		let floatValue = parseFloat( str );
-		if( isNaN(floatValue) ) {
-			return str;
-		}
-		if( !(floatValue < 0) ) {
-			intValue = Math.floor( floatValue );
-		} else {	
-			intValue = Math.floor( Math.abs(floatValue) );
-			isNegative = true;
-		}
-		let power = Math.pow(10,radix);
-		let afterDecimal = parseInt(Math.abs(floatValue)*power - intValue*power + 0.5)/power;
-		// let afterDecimal = (Math.abs(floatValue) - intValue).toFixed(radix);
-		if( !(afterDecimal < 1.0) ) {
-			afterDecimal = 0.0;
-			intValue += 1;
-		}
-		if( radix > 0 ) {
-			for( let i = 0 ; i < radix ; i++ ) {
-				let digit = Math.floor(afterDecimal*10);
-				afterDecimal = afterDecimal*10 - digit;
-				ret += digit;
-			}
-			ret = '.' + ret;
-		}
-	} else {
-	    intValue = parseInt( str );
-		if( isNaN(intValue) ) {
-			return str;
-		}
-		if( intValue < 0 ) {
-			isNegative = true;
-			intValue = -intValue;
-		}
+	let floatValue = parseFloat( str );
+	if( isNaN(floatValue) ) {
+		return str;
 	}
+	if( !(floatValue < 0) ) {
+		intValue = Math.floor( floatValue );
+	} else {	
+		intValue = Math.floor( Math.abs(floatValue) );
+		isNegative = true;
+	}
+	let power = Math.pow(10,radix);
+	let afterDecimal = parseInt(Math.abs(floatValue)*power - intValue*power + 0.5)/power;
+	// let afterDecimal = (Math.abs(floatValue) - intValue).toFixed(radix);
+	if( !(afterDecimal < 1.0) ) {
+		afterDecimal = 0.0;
+		intValue += 1;
+	}
+	if( radix > 0 ) {
+		for( let i = 0 ; i < radix ; i++ ) {
+			let digit = Math.floor(afterDecimal*10);
+			afterDecimal = afterDecimal*10 - digit;
+			ret += digit;
+		}
+		ret = '.' + ret;
+	}
+
 	if( intValue == 0 ) {
 		ret = '0' + ret;
 	} else {

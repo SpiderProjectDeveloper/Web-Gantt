@@ -11,7 +11,8 @@ import { timeToScreen, operToScreen, formatTitleTextContent,
 import { createRect, createPolygon, createLine, createRhomb, 
     createText, setRectCoords, calcRhombCoords } from './utils.js';
 
-export function drawGantt( init=false, shiftOnly=false ) {
+export function drawGantt( init=false, shiftOnly=false ) 
+{
 	if( _globals.redrawAllMode ) { 		// If optimization is required to cope with a huge number of operations... 
 		init=true; 				// ..."init" if always true and...
 		shiftOnly=false;		// ...as well no shifting.
@@ -100,6 +101,15 @@ export function drawGantt( init=false, shiftOnly=false ) {
 			_data.activities[i].onScreen = true;
 		}
 
+		// If no start or fin date - skipping it...
+		if( _data.activities[i].displayStartInSeconds === null ) {
+			_data.activities[i].skip = true;
+			rectCounter++;
+			continue;
+		} else {
+			_data.activities[i].skip = false;
+		}
+
 		_data.activities[i].left = timeToScreen( _data.activities[i].displayStartInSeconds );
 		_data.activities[i].right = timeToScreen( _data.activities[i].displayFinInSeconds );
 		_data.activities[i].top = operToScreen(rectCounter);
@@ -129,7 +139,7 @@ export function drawGantt( init=false, shiftOnly=false ) {
 		//console.log(`i = ${i}, predOp=${predOp}, succOp=${succOp}`);
 		let atLeastOneOpOnScreen = (_data.activities[predOp].onScreen || _data.activities[succOp].onScreen)&&(_data.meta[predOp].visible && _data.meta[succOp].visible); 
 		// let bothOpsAreVisible = _data.meta[predOp].visible && _data.meta[succOp].visible; // MAY BE DELETED!
-		if( !atLeastOneOpOnScreen ) {
+		if( !atLeastOneOpOnScreen && !init ) {
 			continue;
 		}
 		let line, arrowLine, lineX1, lineY1, lineX2, lineY2, arrowY, lineArrowY;
@@ -189,9 +199,9 @@ export function drawGantt( init=false, shiftOnly=false ) {
 	let op100Properties = { fill:_settings.ganttOperation100Color, opacity:_settings.ganttOperation100Opacity };
 	let opCompareProperties = { fill:_settings.ganttCompareColor, opacity:_settings.ganttCompareOpacity };
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
-		if( !_data.activities[i].onScreen && !_data.meta[i].visible ) {
-			continue;
-		}		
+		if( !_data.activities[i].onScreen && !_data.meta[i].visible ) continue;
+		if( _data.activities[i].skip ) continue;
+
 		let rectStart = _data.activities[i].left;
 		let rectEnd = _data.activities[i].right;
 		let rectTop = _data.activities[i].rectTop;

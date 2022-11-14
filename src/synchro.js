@@ -2,6 +2,8 @@
 import { _settings } from './settings.js';
 import { _globals, _data } from './globals.js';
 import { displayConfirmationBox } from './boxes.js';
+import { updateChatIconsInTable } from './drawtable.js'
+
 
 // Verifying the project has not been changed by another user
 export function ifSynchronized( scheduleNext = true, init = null ) {
@@ -42,6 +44,10 @@ export function ifSynchronized( scheduleNext = true, init = null ) {
 							setTimeout( ifSynchronized, _globals.synchronizationRate );
 						}					
 						displaySynchronizedStatus();
+
+						if( _globals.chatPort && 'activities' in props) {
+							updateChatIconsInTable( props.activities );
+						}
 						return;
 					}
 				}
@@ -53,7 +59,7 @@ export function ifSynchronized( scheduleNext = true, init = null ) {
 			}	
 		}
 	} 
-	xhttpProps.open( 'GET', '/.get_project_props?'+_globals.projectId, true );
+	xhttpProps.open( 'GET', '/.get_project_last_updates?'+_globals.projectId, true );
 	xhttpProps.send();
 }
 

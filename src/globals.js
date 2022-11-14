@@ -80,6 +80,7 @@ export function initGlobals( appContainer, user ) {
 	if( _globals.touchDevice ) {	
 		document.documentElement.style.setProperty('--toolbox-table-height', '40px');
 	}
+	
 	_globals.zoomHorizontallyDiv = document.getElementById('toolboxZoomHorizontallyDiv');
 	_globals.zoomHorizontallyInput = document.getElementById('toolboxZoomHorizontallyInput');
 	_globals.zoomHorizontallyIcon = document.getElementById('toolboxZoomHorizontallyIcon');
@@ -107,6 +108,13 @@ export function initGlobals( appContainer, user ) {
 	_globals.zoom100Icon = document.getElementById('toolboxZoom100Icon');
 	_globals.zoomReadableDiv = document.getElementById('toolboxZoomReadableDiv');
 	_globals.zoomReadableIcon = document.getElementById('toolboxZoomReadableIcon');
+
+	// NEW!!
+	_globals.clipLeftDiv = document.getElementById('toolboxClipLeftDiv'); 
+	_globals.clipLeftIcon = document.getElementById('toolboxClipLeftIcon'); 
+	_globals.clipLeftPlusIcon = document.getElementById('toolboxClipLeftPlusIcon'); 
+	_globals.clipLeftMinusIcon = document.getElementById('toolboxClipLeftMinusIcon'); 
+	_globals.clipLeftInput = document.getElementById('toolboxClipLeftInput'); 
 	
 	_globals.containerDiv = document.getElementById("containerDiv");
 	_globals.containerSVG = document.getElementById("containerSVG");
@@ -185,8 +193,11 @@ export function initGlobalsWithDataParameters() {
 				_globals.timeDelim = _data.parameters.timeDelim;
 		if( typeof(_data.parameters.language) === 'string' )
 				_globals.lang = _data.parameters.language;
-		if( typeof(_data.parameters.secondsInPixel) === 'string' ) 
-				_globals.secondsInPixel = _data.parameters.secondsInPixel;
+		if( typeof(_data.project.secondsInPixel) === 'number' ) { 
+			_globals.secondsInPixel = _data.project.secondsInPixel;
+		} else if( typeof(_data.project.secondsInPixel) === 'string' ) { 
+			_globals.secondsInPixel = parseInt(_data.project.secondsInPixel);
+		}
 		if( typeof(_data.parameters.expandToLevelAtStart) === 'string' ) 
 				_globals.expandToLevelAtStart = _data.parameters.expandToLevelAtStart;
 		if( typeof(_data.parameters.user) === 'string' ) 
