@@ -15,7 +15,7 @@ import { onWindowMouseMove, onGanttWheel, onVerticalSplitterSVGMouseDown,
 } from './on.js'
 import { drawAll, calculateHorizontalZoomByVerticalZoom, displayLinksStatus, zoom100, zoomReadable,
   initLayoutCoords, calcNotHiddenOperationsLength, displayXZoomFactor, displayYZoomFactor,  
-	expandToLevel, initDataHelpers, createCodeLevelParentKey } from './helpers.js';
+	expandToLevel, initDataHelpers, createCodeLevelParentKey, setClipLeftPct } from './helpers.js';
 import { getCookie, setCookie, deleteCookie, createDefs, dateIntoSpiderDateString, decColorToString, 
 	trimString, filterInput, digitsOnly } from './utils.js';
 import { initMenu } from './menu.js';
@@ -120,7 +120,11 @@ function loadData()
 				}
 		  }
     };
-		let requestUrl = _settings.urlData + '?' + _globals.projectId;         
+		let requestUrl = _settings.urlData + '?' + 'projectId=' + _globals.projectId;
+		if( typeof(_globals.structCode) !== 'undefined' && _globals.structCode !== null ) {
+			requestUrl += '&structCode=' + _globals.structCode;
+		}
+		// + '&struct';         
 		xmlhttp.open("GET", requestUrl, true);
 		xmlhttp.setRequestHeader("Cache-Control", "no-cache");
 		xmlhttp.send();
@@ -137,7 +141,7 @@ function displayData() {
 function initData() 
 {
 	_data.project.curTimeInSeconds = _data.project.CurTime;
-	_data.project.CurTime = dateIntoSpiderDateString( _data.project.CurTime );
+	_data.project.CurTime = dateIntoSpiderDateString( _data.project.CurTime, true );
 	if( _data.activities.length == 0 ) {
 		displayMessageBox( _texts[_globals.lang].errorParsingData );						
 		return(-1);				
@@ -356,6 +360,8 @@ function initData()
 
 	readCustomSettings();
 
+	setClipLeftPct( _globals.clipLeftPct, false );
+
 	calcNotHiddenOperationsLength();
 
 	// Initializing zoom
@@ -531,12 +537,14 @@ function displayHeaderAndFooterInfo() {
 	
 	let uploadTime = '';
 	if( 'UploadTime' in _data.project ) {
-		let uploadTime = dateIntoSpiderDateString( _data.parameters.uploadTime );
+		uploadTime = dateIntoSpiderDateString( _data.parameters.uploadTime, true );
 		uploadTime = " / " + _texts[_globals.lang].uploadTime + ": " + uploadTime;
 	}
 	if( !_globals.touchDevice ) {
-		let timeAndVersion = _data.project.CurTime + uploadTime + " | " + _texts[_globals.lang].version + ": " + _data.project.Version;
-		elProjectAndTimeVersion.innerText = timeAndVersion;
+		//let timeAndVersion = _data.project.CurTime + uploadTime + " | " + _texts[_globals.lang].version + ": " + _data.project.Version;
+		let timeAndVersion = _data.project.CurTime + uploadTime + " (" + _data.project.Version + ")";
+		let structureName = (_data.wbs && _data.wbs.Name) ? (' | ' + _data.wbs.Name ) : '';		
+		elProjectAndTimeVersion.innerText = timeAndVersion + structureName;
 	} else {
 		projectName.setAttribute('style','font-size:18px;');
 		elProjectAndTimeVersion.setAttribute('style','display:none');

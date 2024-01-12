@@ -185,7 +185,8 @@ export function validateGanttLeft( left ) {
 }
 
 
-export function validateTopAndHeight( top, height ) {
+export function validateTopAndHeight( top, height ) 
+{
 	let minVisibleHeight = calcMinVisibleHeight();
 	let maxVisibleHeight = calcMaxVisibleHeight();
 	let newVisibleHeight;
@@ -903,4 +904,27 @@ function calcPhaseCoords( rectStart, rectTop, rectWidth, rectHeight, brackets=0 
 		phaseCoords += " "+(rectStart + thick)+" "+(rectBottom-phaseBracketHeight)+" "+rectStart+" "+rectBottom;		
 	}
 	return phaseCoords;
+}
+
+
+export function setClipLeftPct( clipPct, writeCookie=true ) 
+{
+	if( typeof(clipPct) === 'undefined' ) clipPct = 0;
+	if( clipPct === null ) clipPct = 0;
+	if( clipPct < 0 ) clipPct = 0;
+	if( clipPct > 99 ) clipPct = 99;
+	let newMin = _data.startMinInSeconds + (_data.finMaxInSeconds - _data.startMinInSeconds) * clipPct / 100;
+	_data.startFinSeconds = _data.finMaxInSeconds - newMin;
+	_data.visibleMin = newMin; // - (_data.finMaxInSeconds-_data.startMinInSeconds)/20.0;
+	_data.visibleMaxWidth = _data.visibleMax - _data.visibleMin;
+
+	_globals.clipLeftPct = clipPct;
+	let id = document.getElementById('toolboxClipLeftInput');
+	if( id ) id.value = clipPct;
+
+	if( writeCookie ) {
+		setCookie('clipLeftPct', clipPct );
+	}
+
+	return clipPct;
 }

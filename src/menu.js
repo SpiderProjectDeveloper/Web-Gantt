@@ -25,6 +25,7 @@ export function initMenu() {
 	//el.onclick = function(e) { logout(); };
 
 	el = document.getElementById('dropdownContent');
+	/*
 	el.addEventListener('mouseover', 
 		function(e) { 
 				if( !_dbox ) { 
@@ -40,7 +41,10 @@ export function initMenu() {
 						}
 				} 
 		}, false );
-
+	*/
+	
+	el = document.getElementById('toolboxButton');
+	/*
 	el = document.getElementById('toolboxContent');
 	el.addEventListener('mouseover', 
 		function(e) { 
@@ -57,7 +61,7 @@ export function initMenu() {
 						}
 				} 
 		}, false );
-
+	*/
 	el = document.getElementById('menuUserName');
   el.innerHTML = _globals.user;
   //el.innerHTML = `${_texts[_globals.lang].menuLogout} (${_globals.user})`;
@@ -81,16 +85,17 @@ function onDropdownButtonClick() {
 	el.style.display=(el.style.display==='block')?'none':'block';
 }
 
-function onToolboxButtonClick() {
+function onToolboxButtonClick() 
+{
 	hideContent('dropdownContent');
 	let el=document.getElementById('toolboxContent'); 
 	el.style.display=(el.style.display==='block')?'none':'block';       
 
 	let pageGantt = document.getElementById('pageGantt');
 	if( pageGantt.style.display === 'none' ) {
-					pageGantt.style.display = 'block';
-					let pageHelp = document.getElementById('pageHelp');
-					pageHelp.style.display = 'none';    
+		pageGantt.style.display = 'block';
+		let pageHelp = document.getElementById('pageHelp');
+		pageHelp.style.display = 'none';    
 	}
 }
 
@@ -111,6 +116,19 @@ function menuOptionChosen( option ) {
 	}
 }
 
+function showContent( id ) {
+	let el = document.getElementById(id);
+	if( !el ) {
+			return;
+	} 
+	if( el.style.display !== 'none' ) {
+			el.style.display = 'none';
+	} else {
+		el.style.display = 'block';
+	}
+}
+
+
 function hideContent( id ) {
 	let el = document.getElementById(id);
 	if( !el ) {
@@ -122,22 +140,26 @@ function hideContent( id ) {
 }
 
 
-function closeProject() {
-	if( document.location.host ) {
+function closeProject() 
+{
+	if( document.location.host ) 
+	{
 		let xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function() {
+		xmlhttp.onreadystatechange = function() 
+		{
 			if (this.readyState == 4 ) {
 				window.close();
 			}
 		};
-		xmlhttp.open("GET", _settings.urlCloseProject + "?" + window.location.search, true);
+		xmlhttp.open("GET", _settings.urlCloseProject + "?" + _globals.projectId, true);
 		xmlhttp.setRequestHeader("Cache-Control", "no-cache");
 		xmlhttp.send();
 	} 
 }
 
 
-function logout() {
+function logout() 
+{
 	if( document.location.host ) {
 		var xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {

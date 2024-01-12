@@ -7,7 +7,7 @@ import { drawAll, initLayoutCoords, moveColumnOfTable, setNewColumnWidth, setVer
   setVerticalScrollSVGThick, setTableScrollSVGThick, setGanttHScrollSVGThick, 
   validateGanttLeft, validateTopAndHeight, getGanttMaxLeft,
 	expandToLevel, zoomXR, zoomYR, zoomXYR, moveXR, moveYR, 
-	calculateHorizontalZoomByVerticalZoom, displayXZoomFactor  // NEW!!
+	calculateHorizontalZoomByVerticalZoom, displayXZoomFactor, setClipLeftPct  // NEW!!
 } from './helpers.js';
 import { setCookie, filterInput, getElementPosition, getCoordinatesOfClickOnImage } from './utils.js';
 
@@ -599,13 +599,9 @@ export function onClipLeftBlur(id)
 			value = 99;
 		}
 	}
-	id.value = value;
-	let newMin = _data.startMinInSeconds + (_data.finMaxInSeconds - _data.startMinInSeconds) * value / 100;
-	_data.startFinSeconds = _data.finMaxInSeconds - newMin;
-	_data.visibleMin = newMin; // - (_data.finMaxInSeconds-_data.startMinInSeconds)/20.0;
-	_data.visibleMaxWidth = _data.visibleMax - _data.visibleMin;
+	setClipLeftPct( value );
 
-	let newZoom = calculateHorizontalZoomByVerticalZoom( 0, _settings.readableNumberOfOperations );
+	let newZoom = calculateHorizontalZoomByVerticalZoom( 0, _globals.visibleHeight );
 	_globals.visibleTop = newZoom[0];
 	_globals.visibleHeight = newZoom[1];
 	_globals.ganttVisibleLeft = newZoom[2];

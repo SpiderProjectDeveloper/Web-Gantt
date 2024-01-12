@@ -1,6 +1,6 @@
 export var _settings = {
 	NS: 'http://www.w3.org/2000/svg',
-	urlData:'/.gantt_data', urlLogout:'/.logout', urlCloseProject: './close_project',
+	urlData:'/.gantt_data', urlLogout:'/.logout', urlCloseProject: '/.close_project',
 	urlSaveData: '/.save_gantt', urlIsSynchronized: '/.check_gantt_synchro',  
 	ganttOperation0Color:'#2f8f2f', ganttOperation0Opacity:1.0, ganttOperation100Color:'#7f7f7f', ganttOperation100Opacity:1.0,
 	ganttPhaseColor:'#0f7f07f', ganttPhaseOpacity:1.0, 

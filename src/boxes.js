@@ -629,6 +629,8 @@ function createUserDataObjectToSendAfterEditing( i, editedFieldRef=null )
 				Code: _data.activities[i].Code,
 				Level: (typeof(_data.activities[i].Level) !== 'undefined' && _data.activities[i].Level !== null) ?
 					String(_data.activities[i].Level) : '',
+				f_UniId: (typeof(_data.activities[i].f_UniId) !== 'undefined') ?
+					_data.activities[i].f_UniId : null,
 				fileName: decodeURIComponent( _globals.projectId ),
 				data: data
 		}),

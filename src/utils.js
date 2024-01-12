@@ -485,7 +485,8 @@ export function dateIntoJSDateString( date ) {
 }
 
 
-export function dateIntoSpiderDateString( date, dateOnly=false ) {
+export function dateIntoSpiderDateString( date, dateOnly=false ) 
+{
 	let spiderDateString = null;
 
 	if( typeof(date) === 'undefined' || date === null || date === '' ) {

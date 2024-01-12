@@ -55,6 +55,8 @@ export var _globals = {
 	setVerticalSplitterWidthOp: -1, setVerticalScrollSVGThickOp: -1, 
 	setGanttHScrollSVGThickOp: -1, setTableScrollSVGThickOp: -1,
 
+	clipLeftPct: 0,
+
 	chatServer: null, chatPort:null, chatReadUrl:'.chat_read', chatReadImageUrl: '.chat_read', chatInsertUrl:'.chat_write',
 	chatUpdateUrl:'.chat_update', chatRemoveUrl:'.chat_remove',
 	chatUpdateHTML:'&#9998;', chatSendUpdateHTML:'&#10004;', chatRemoveHTML:'&#10006;', chatCancelEditHTML:'&nwarhk;',
@@ -80,7 +82,6 @@ export function initGlobals( appContainer, user ) {
 	if( _globals.touchDevice ) {	
 		document.documentElement.style.setProperty('--toolbox-table-height', '40px');
 	}
-	
 	_globals.zoomHorizontallyDiv = document.getElementById('toolboxZoomHorizontallyDiv');
 	_globals.zoomHorizontallyInput = document.getElementById('toolboxZoomHorizontallyInput');
 	_globals.zoomHorizontallyIcon = document.getElementById('toolboxZoomHorizontallyIcon');
@@ -167,9 +168,10 @@ export function initGlobals( appContainer, user ) {
 		_globals.sessId = cookieSessId;
 	}
 
-	let searchArray = window.location.search.split('&');
+	let searchArray = window.location.search.substring(1).split('&');
 	for( let i = 0 ; i < searchArray.length ; i++ ) {
 		let kv = searchArray[i].split('=');
+		/*
 		if( i === 0 ) {
 			_globals.projectId = kv[1];
 		} else if( i === 1 ) {
@@ -180,6 +182,23 @@ export function initGlobals( appContainer, user ) {
 				}
 			} catch(e) {;}	
 		} 
+		*/
+		if( kv[0] === 'projectId' ) {
+			_globals.projectId = kv[1];
+			continue;
+		} 
+		if( kv[0] === 'dataChanged' ) {
+			try {
+				let dch = parseInt(kv[1]);
+				if( dch > 0 ) {
+					_globals.uriDataChanged = dch;
+				}
+			} catch(e) {;}	
+			continue;
+		} 
+		if( kv[0] === 'structCode' ) {
+			_globals.structCode = kv[1];
+		}
 	}
 	_globals.dataSynchronized = 1;
 }
@@ -219,8 +238,10 @@ export function setGlobal( key, value ) {
 	_globals[key] = value;
 }
 
-export function setData( data ) {
-	if( typeof(data) !== 'object' ) {
+export function setData( data ) 
+{
+	if( typeof(data) !== 'object' ) 
+	{
 		_data = {};
 	} else {
 		_data = data;

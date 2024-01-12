@@ -68,5 +68,10 @@ export function readCustomSettings() {
     let gvl = getCookie('ganttVisibleLeft', 'float');
     if( gvl ) {
         _globals.ganttVisibleLeft = validateGanttLeft(gvl);
-    }    
+    }
+		
+		let clipLeftPct = getCookie('clipLeftPct', 'int');
+		if( clipLeftPct !== null && clipLeftPct >= 0 && clipLeftPct < 100 ) {
+			_globals.clipLeftPct = clipLeftPct;
+		}
 }
